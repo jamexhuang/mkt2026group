@@ -19,14 +19,14 @@ Model (single):
   IV:  TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
   CV:  Picture, URL, AtMention
 
-Input:  ../data/research_data.csv
-Output: output/report.html              ← full HTML report
-        output/stats_analysis.csv       ← descriptive statistics
-        output/correlation_matrix.csv   ← Pearson r matrix
-        output/correlation_significance.csv
-        output/regression_results.txt   ← plain-text regression summary
-        output/sas_ready.csv            ← full CSV reordered for SAS
-        output/plots/*.png              ← diagnostic plots
+Input:  ../../data/research_data.csv
+Output: output/report.html                 ← full HTML report
+        output/stats_analysis.csv          ← descriptive statistics
+        output/correlation_matrix.csv      ← Pearson correlation matrix
+        output/correlation_significance.csv ← correlation with sig stars
+        output/regression_results.txt      ← regression coefficients & tests
+        ../sas/input/sas_ready.csv         ← full CSV reordered for SAS input
+        output/plots/*.png                 ← diagnostic plots
 """
 
 import pandas as pd
@@ -54,10 +54,13 @@ import base64
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "..", "data", "research_data.csv")
-OUT_DIR = os.path.join(BASE_DIR, "output")
+DATA_PATH = os.path.join(BASE_DIR, "..", "..", "data", "research_data.csv")
+OUT_DIR   = os.path.join(BASE_DIR, "output")
 PLOT_DIR = os.path.join(OUT_DIR, "plots")
+SAS_IN_DIR = os.path.join(BASE_DIR, "..", "sas", "input")
+os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(PLOT_DIR, exist_ok=True)
+os.makedirs(SAS_IN_DIR, exist_ok=True)
 
 # Try to use a CJK-compatible font for matplotlib
 for font_name in ["PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC",
@@ -1051,10 +1054,9 @@ remaining_cols = [c for c in existing_cols if c not in RESEARCH_FIRST]
 ordered_cols = [c for c in RESEARCH_FIRST if c in existing_cols] + remaining_cols
 sas_df = sas_df[ordered_cols]
 
-sas_path = os.path.join(OUT_DIR, "sas_ready.csv")
+sas_path = os.path.join(SAS_IN_DIR, "sas_ready.csv")
 sas_df.to_csv(sas_path, index=False, encoding="utf-8-sig")
 print(f"[Saved] sas_ready.csv  ({sas_df.shape[0]} rows × {sas_df.shape[1]} cols)")
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  16. Write HTML Report
@@ -1069,12 +1071,13 @@ print(f"\n[Saved] report.html")
 #  Summary
 # ═══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  Output files saved to: Statics/output/")
+print("  Output files saved to: analysis/python/output/")
 print("  ─ report.html                  (full HTML report)")
 print("  ─ stats_analysis.csv           (descriptive statistics)")
 print("  ─ correlation_matrix.csv       (Pearson r matrix)")
 print("  ─ correlation_significance.csv (r with significance stars)")
 print("  ─ regression_results.txt       (OLS + HC1 robust SE)")
+print("  SAS input saved to: analysis/sas/input/")
 print("  ─ sas_ready.csv               (all columns, research vars first)")
 print("  ─ plots/*.png                  (diagnostic plots)")
 print("=" * 70)

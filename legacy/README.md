@@ -1,10 +1,15 @@
 # legacy/
 
-This directory contains archived code that is no longer part of the active analysis pipeline. Do not modify or run these files.
+This directory contains archived materials that are no longer part of the active pipeline. Do not modify or delete these files — they contain important reference information.
 
 ---
 
 ## Contents
+
+### `task-notes.md`
+Original `README.md` from the project root. Contains the full assignment brief, task description, deadlines, report outline, Dennis's notes on variable choices, hypothesis statements, and team working notes. Kept here for reference.
+
+---
 
 ### `notebooks/`
 **`Final_report.ipynb`** — Original Google Colab notebook. This was the starting point of the entire project: it scraped and cleaned the data, ran NLP feature extraction (sincerity lexicon, valence scoring, surface features), and exported the processed dataset. Archived after the NLP pipeline output was committed to `data/research_data.csv` and the analysis was moved to standalone scripts.

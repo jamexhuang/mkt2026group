@@ -24,8 +24,15 @@
    ============================================================ */
 
 /* ── 0. Set paths ─────────────────────────────────────────── */
-/* CHANGE the path below to match where you saved sas_ready.csv */
-%LET datapath = /path/to/your/sas_ready.csv;
+/*
+   sas_ready.csv is located at:  analysis/sas/input/sas_ready.csv
+   SAS does not use relative paths — set the full absolute path below.
+   Example (Linux / SAS Studio):
+     %LET datapath = /workspaces/mkt2026group/analysis/sas/input/sas_ready.csv;
+   Example (Windows):
+     %LET datapath = C:\projects\mkt2026group\analysis\sas\input\sas_ready.csv;
+*/
+%LET datapath = /workspaces/mkt2026group/analysis/sas/input/sas_ready.csv;
 /* Output folder for ODS reports (optional, leave empty to suppress) */
 %LET outpath  = ;
 
@@ -233,8 +240,10 @@ TITLE;
 /* ============================================================
    HOW TO USE THIS FILE
    ─────────────────────────────────────────────────────────────
-   1. Run run_statistics.py to generate sas_ready.csv
-   2. Update %LET datapath = ... to the full path of sas_ready.csv
+   1. Run `python analysis/python/run_statistics.py` to generate
+        analysis/sas/input/sas_ready.csv
+   2. Update %LET datapath (line ~28) to the full absolute path
+        of sas_ready.csv on your machine / SAS environment
    3. Open SAS and submit this file, OR run via batch:
         sas Booking_Engagement_Analysis.sas
    4. Key tables for the paper:
@@ -244,4 +253,5 @@ TITLE;
         Table 4  → Model 2 PROC REG   (Extension OLS)
         Table 5  → PROC UNIVARIATE    (Residual diagnostics)
         Table 6  → PROC SURVEYREG     (Robust SE)
+   5. SAS output files go in: analysis/sas/output/
    ============================================================ */
