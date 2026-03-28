@@ -1,0 +1,109 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{threeparttable}
+\usepackage{caption}
+\usepackage{lscape}
+\usepackage{amsmath}
+
+\title{Statistical Results: Social Media Engagement on Booking.com}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{1. Descriptive Statistics}
+\begin{table}[h]
+\centering
+\caption{Descriptive Statistics ($N=766$)}
+\begin{threeparttable}
+\begin{tabular}{lrrrrrr}
+\toprule
+Variable & Mean & SD & Min & Median & Max \\
+\midrule
+Engagement (raw)          & 45.17  & 203.18 & 0.00 & 4.00 & 2474.00 \\
+$\log(1+\text{Engagement})$ & 1.94   & 1.57   & 0.00 & 1.61 & 7.81 \\
+Text Length               & 23.45  & 12.26  & 0.00 & 22.00& 53.00 \\
+Question Mark (dummy)     & 0.17   & 0.37   & 0.00 & 0.00 & 1.00 \\
+Emotional Valence         & 0.79   & 1.53   & -3.35& 0.00 & 3.95 \\
+Hashtag Count             & 0.14   & 0.49   & 0.00 & 0.00 & 3.00 \\
+Picture Count             & 0.31   & 0.52   & 0.00 & 0.00 & 4.00 \\
+URL Count                 & 0.92   & 0.72   & 0.00 & 1.00 & 2.00 \\
+At-Mention Count          & 0.10   & 0.36   & 0.00 & 0.00 & 3.00 \\
+Emoji Count               & 0.40   & 0.88   & 0.00 & 0.00 & 13.00 \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+\section*{2. Pearson Correlation Matrix}
+\begin{table}[h]
+\centering
+\caption{Pearson Correlation Matrix}
+\resizebox{\textwidth}{!}{%
+\begin{threeparttable}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Variable & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+\midrule
+1. $\log(1+\text{Engagement})$ & 1.000  & & & & & & & & \\
+2. Text Length                 & -0.184*** & 1.000 & & & & & & & \\
+3. Question Mark (dummy)       & 0.262***  & -0.191***& 1.000 & & & & & & \\
+4. Emotional Valence           & 0.234***  & 0.150*** & 0.089*  & 1.000 & & & & & \\
+5. Hashtag Count               & 0.452***  & -0.012  & 0.075*  & 0.047   & 1.000 & & & & \\
+6. Picture Count               & 0.451***  & -0.027  & 0.163***& 0.312***& 0.044   & 1.000 & & & \\
+7. URL Count                   & 0.318***  & 0.063   & -0.018  & 0.175***& 0.193***& 0.501***& 1.000 & & \\
+8. At-Mention Count            & 0.319***  & 0.035   & 0.026   & 0.056   & 0.460***& 0.043   & 0.102** & 1.000 & \\
+9. Emoji Count                 & 0.411***  & -0.044  & 0.206***& 0.257***& 0.087*  & 0.423***& 0.154***& 0.127***& 1.000 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: *** $p < 0.001$, ** $p < 0.01$, * $p < 0.05$ (two-tailed).
+\end{tablenotes}
+\end{threeparttable}
+}
+\end{table}
+
+\section*{3. OLS Regression Results}
+\begin{table}[h]
+\centering
+\caption{OLS Regression Results (Dependent Variable: $\log(1+\text{Engagement})$)}
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{Model 1 (Baseline)} & \multicolumn{2}{c}{Model 2 (Extension)} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+Variable & Coefficient & (SE) & Coefficient & (SE) \\
+\midrule
+\multicolumn{5}{l}{\textit{Independent Variables}} \\
+Text Length (H1)        & -0.0218*** & (0.0035)& -0.0211***& (0.0035) \\
+Question Mark (H2)      & 0.5754***  & (0.1170)& 0.4793*** & (0.1149) \\
+Emotional Valence (H3)  & 0.1107***  & (0.0293)& 0.0840**  & (0.0288) \\
+Hashtag Count (H4)      & 1.1111***  & (0.0983)& 1.0959*** & (0.0958) \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Control / Extension Variables}} \\
+Picture Count           & 1.0142***  & (0.0979)& 0.7859*** & (0.1015) \\
+URL Count               & 0.1365*    & (0.0694)& 0.1694*   & (0.0677) \\
+At-Mention Count        & 0.5972***  & (0.1326)& 0.5145*** & (0.1297) \\
+Emoji Count             & --         & --      & 0.3428*** & (0.0525) \\
+\addlinespace
+Intercept               & 1.6116***  & (0.1084)& 1.5456*** & (0.1060) \\
+\midrule
+Observations            & \multicolumn{2}{c}{766} & \multicolumn{2}{c}{766} \\
+$R^2$                   & \multicolumn{2}{c}{0.4638} & \multicolumn{2}{c}{0.4924} \\
+Adjusted $R^2$          & \multicolumn{2}{c}{0.4589} & \multicolumn{2}{c}{0.4871} \\
+$F$-statistic           & \multicolumn{2}{c}{93.67***} & \multicolumn{2}{c}{91.81***} \\
+Max VIF                 & \multicolumn{2}{c}{1.503} & \multicolumn{2}{c}{--} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item Notes: Standard errors in parentheses. *** $p < 0.001$, ** $p < 0.01$, * $p < 0.05$ (two-tailed).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\end{document}
