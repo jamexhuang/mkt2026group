@@ -105,11 +105,11 @@ The baseline empirical model examines how the four focal textual features relate
 \end{aligned}
 \end{equation}
 
-Conceptually, this specification tests whether the proposed textual features explain variation in engagement above and beyond visual or structural elements in the post. Because the dependent variable is a non-negative count-based sum and the sample shows substantial right skew, the main analysis may use
+Conceptually, this specification tests whether the proposed textual features explain variation in engagement above and beyond visual or structural elements in the post. Because the dependent variable is a non-negative count-based sum and the sample shows substantial right skew, the dependent variable is modeled as
 \[
 \log\bigl(1 + \text{Engagement}_i\bigr)
 \]
-as the modeled dependent variable to reduce the influence of extreme observations and improve interpretability. The conceptual definition of engagement, however, remains the raw sum of likes, comments, and shares.
+to reduce the influence of extreme observations and improve interpretability. The conceptual definition of engagement, however, remains the raw sum of likes, comments, and shares.
 
 To extend the model, a secondary specification adds emoji as an additional explanatory variable:
 
@@ -223,11 +223,11 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \end{aligned}
 \end{equation}
 
-此模型用以檢驗：文字特徵是否能在視覺與結構因素之外，額外解釋互動差異。由於依變數為非負計數加總且右偏明顯，實證估計可採
+此模型用以檢驗：文字特徵是否能在視覺與結構因素之外，額外解釋互動差異。由於依變數為非負計數加總且右偏明顯，本研究以
 \[
 \log\bigl(1 + \text{Engagement}_i\bigr)
 \]
-以降低極端值影響並提升解讀性；但互動概念定義仍維持 likes、comments、shares 的原始加總。
+作為實證估計之依變數，以降低極端值影響並提升解讀性；互動的概念定義仍維持 likes、comments、shares 的原始加總。
 
 延伸模型加入 emoji：
 
