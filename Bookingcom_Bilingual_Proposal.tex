@@ -32,7 +32,7 @@
 \section{Background and Motivation}
 Social media engagement has become an important performance indicator for brands because likes, comments, and shares reflect audience attention, interaction, and the social diffusion of branded content. For a travel platform such as Booking.com, engagement on X can be especially valuable because travel decisions are socially visible, information-intensive, and often shaped by peer endorsement. Mohammad et al. (2024) argue that social commerce interactions can strengthen credibility and influence downstream behavioral outcomes, which makes engagement a meaningful intermediate outcome for hospitality and travel brands. In this context, understanding which textual features encourage stronger engagement can help Booking.com design more effective posts and communicate more persuasively with potential travelers.
 
-This proposal focuses on the textual design of Booking.com's posts rather than on broad brand strategy. The central idea is that the way a post is written can affect how users react to it. Prior literature suggests that content structure, interactivity cues, emotional tone, and discoverability signals can influence user responses on social media. Building on that logic, this study examines whether text length, question marks, emotional valence, and hashtags are associated with higher engagement for Booking.com posts on X, while controlling for non-textual post elements such as pictures, URLs, and at-mentions.
+This proposal focuses on the textual design of Booking.com's posts rather than on broad brand strategy. The central idea is that the way a post is written can affect how users react to it. Prior literature suggests that content structure, interactivity cues, emotional tone, and discoverability signals can influence user responses on social media (Moran et al., 2019; van der Harst and Angelopoulos, 2024). Building on that logic, this study examines whether text length, question marks, emotional valence, and hashtags are associated with higher engagement for Booking.com posts on X, while controlling for non-textual post elements such as pictures (Li and Xie, 2020), URLs, and at-mentions.
 
 \section{Research Question}
 The research question guiding this study is:
@@ -93,7 +93,7 @@ Emoji & Extension variable & Number of emoji characters contained in the post & 
 
 The variable definitions are theoretically motivated and empirically grounded in the data preparation workflow. Text length captures how much verbal information a post provides. The \texttt{length} field is based on cleaned text rather than raw character count, which is appropriate because it better reflects the substantive amount of textual content available to readers. The question-mark variable captures a direct interactive cue and is measured as a count rather than a simple dummy, allowing the analysis to reflect different degrees of interrogative wording.
 
-Emotional valence is measured with the existing \texttt{valence} field, which is generated through lexicon matching on the cleaned tokens and expresses the positivity or negativity of the language used in each post. This proposal treats valence as a continuous sentiment measure rather than splitting sentiment into separate positive and negative variables at this stage. Hashtags are measured as counts because the number of hashtags may reflect stronger discoverability or stronger topic signaling. The control variables capture non-textual or structural post elements that may affect engagement independently of writing style. Emoji is retained as an extension variable because prior literature suggests that emoji can increase engagement, but this study prioritizes a cleaner four-hypothesis core model in the main analysis.
+Emotional valence is measured with the existing \texttt{valence} field, which is generated through lexicon matching on the cleaned tokens and expresses the positivity or negativity of the language used in each post. This proposal treats valence as a continuous sentiment measure rather than splitting sentiment into separate positive and negative variables at this stage. Hashtags are measured as counts because the number of hashtags may reflect stronger discoverability or stronger topic signaling. The control variables capture non-textual or structural post elements that may affect engagement independently of writing style. Emoji is retained as an extension variable because prior literature suggests that emoji can increase engagement (Ko et al., 2022), but this study prioritizes a cleaner four-hypothesis core model in the main analysis.
 
 \section{Proposed Model Specification}
 The baseline empirical model examines how the four focal textual features relate to social media engagement while controlling for other post characteristics:
@@ -153,7 +153,7 @@ The next step is to estimate the proposed models, assess whether the hypothesize
 \section{研究背景與動機}
 社群媒體互動（engagement）已成為品牌重要的績效指標，因為按讚、留言與分享能反映受眾注意力、互動程度，以及品牌內容在社群中的擴散效果。對 Booking.com 這類旅遊平台而言，X 上的互動更具價值，因為旅遊決策高度社會化、資訊需求高，且常受到同儕意見影響。Mohammad 等人（2024）指出，社群商務互動能提升品牌可信度，並影響後續行為結果，因此對旅宿與旅遊品牌而言，互動可視為具管理意義的中介成果。
 
-本研究聚焦於 Booking.com 貼文的「文字設計」，而非整體品牌策略。核心概念是：貼文怎麼寫，會影響使用者如何反應。既有文獻顯示，內容結構、互動線索、情緒語調與可發現性訊號，都可能影響社群回應。據此，本研究檢驗文字長度、問號、情緒正向程度與 hashtag 是否與更高互動有關，並控制圖片、URL 與 at-mention 等非文字因素。
+本研究聚焦於 Booking.com 貼文的「文字設計」，而非整體品牌策略。核心概念是：貼文怎麼寫，會影響使用者如何反應。既有文獻顯示，內容結構、互動線索、情緒語調與可發現性訊號，都可能影響社群回應（Moran 等人，2019；van der Harst 與 Angelopoulos，2024）。據此，本研究檢驗文字長度、問號、情緒正向程度與 hashtag 是否與更高互動有關，並控制圖片（Li 與 Xie，2020）、URL 與 at-mention 等非文字因素。
 
 \section{研究問題}
 本研究的核心問題如下：
@@ -212,7 +212,7 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
 
-上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。問號以計數而非虛擬變數處理，可捕捉不同程度的互動語氣。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。emoji 則保留於延伸模型，作為額外解釋力檢驗。
+上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。問號以計數而非虛擬變數處理，可捕捉不同程度的互動語氣。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。基於文獻指出 emoji 有助於提升互動（Ko 等人，2022），本研究將 emoji 保留於延伸模型中，作為額外解釋力檢驗。
 
 \section{模型設定}
 基準模型檢驗四個核心文字特徵對互動的影響，並控制其他貼文特徵：
