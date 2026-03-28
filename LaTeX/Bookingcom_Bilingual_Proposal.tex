@@ -50,7 +50,7 @@ Second, question marks are treated as an interactivity cue. De Vries, Gensler, a
 
 Third, emotional valence captures whether the wording of a post is more positive or negative. Reddy and Prakash (2024) suggest that more positive sentiment can enhance user interaction and loyalty in social media environments. Because tourism communication often relies on aspiration, excitement, and pleasant imagery, positively valenced language is expected to generate stronger reactions.
 
-Fourth, hashtags may improve discoverability, organize topical meaning, and connect a post to broader conversations. Kumar, Qiu, and Kumar (2022) argue that hashtags can play an important role in increasing social media audience engagement. For Booking.com, hashtags may make travel posts easier to locate and more visible within trend-based conversations, thereby improving engagement.
+Fourth, hashtags may improve discoverability, organize topical meaning, and connect a post to broader conversations. Gkikas et al. (2022) demonstrate that text characteristics, including the number of hashtags, positively impact user engagement rates outperforming other post features. For Booking.com, hashtags may make travel posts easier to locate and more visible within trend-based conversations, thereby improving engagement.
 
 Based on this reasoning, the study proposes the following hypotheses:
 \begin{enumerate}[label=H\arabic*.]
@@ -81,7 +81,7 @@ Construct & Role & Operational definition & Dataset field \\
 \endhead
 Social media engagement & Dependent variable & Sum of likes, comments, and shares for each post & Derived from \texttt{like}, \texttt{comment}, \texttt{share} \\
 Text length & Main independent variable & Number of cleaned English words after removing URLs, mentions, hashtags, and non-letter symbols, then filtering to recognized English words & \texttt{length} \\
-Question mark & Main independent variable & Number of question marks in the post after removing URLs & \texttt{question} \\
+Question mark & Main independent variable & Binary dummy tracking if the post contains at least one question mark after removing URLs (0=No, 1=Yes) & \texttt{question} \\
 Emotional valence & Main independent variable & Lexicon-based sentiment score centered around neutral tone; higher values indicate more positive wording & \texttt{valence} \\
 Hashtag & Main independent variable & Number of hashtags contained in the post & \texttt{hashtag} \\
 Picture & Control variable & Number of pictures or visual media items attached to the post & \texttt{picture} \\
@@ -91,7 +91,7 @@ Emoji & Extension variable & Number of emoji characters contained in the post & 
 \bottomrule
 \end{longtable}
 
-The variable definitions are theoretically motivated and empirically grounded in the data preparation workflow. Text length captures how much verbal information a post provides. The \texttt{length} field is based on cleaned text rather than raw character count, which is appropriate because it better reflects the substantive amount of textual content available to readers. The question-mark variable captures a direct interactive cue and is measured as a count rather than a simple dummy, allowing the analysis to reflect different degrees of interrogative wording.
+The variable definitions are theoretically motivated and empirically grounded in the data preparation workflow. Text length captures how much verbal information a post provides. The \texttt{length} field is based on cleaned text rather than raw character count, which is appropriate because it better reflects the substantive amount of textual content available to readers. The question-mark variable captures a direct interactive cue and is operationalized as a binary dummy variable, since the vast majority of interrogative posts contain only a single question mark.
 
 Emotional valence is measured with the existing \texttt{valence} field, which is generated through lexicon matching on the cleaned tokens and expresses the positivity or negativity of the language used in each post. This proposal treats valence as a continuous sentiment measure rather than splitting sentiment into separate positive and negative variables at this stage. Hashtags are measured as counts because the number of hashtags may reflect stronger discoverability or stronger topic signaling. The control variables capture non-textual or structural post elements that may affect engagement independently of writing style. Emoji is retained as an extension variable because prior literature suggests that emoji can increase engagement (Ko et al., 2022), but this study prioritizes a cleaner four-hypothesis core model in the main analysis.
 
@@ -100,7 +100,7 @@ The baseline empirical model examines how the four focal textual features relate
 
 \begin{equation}
 \begin{aligned}
-\text{Engagement}_i = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
 & + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i + \varepsilon_i
 \end{aligned}
 \end{equation}
@@ -115,7 +115,7 @@ To extend the model, a secondary specification adds emoji as an additional expla
 
 \begin{equation}
 \begin{aligned}
-\text{Engagement}_i = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
 & + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i \\
 & + \beta_8\text{Emoji}_i + \varepsilon_i
 \end{aligned}
@@ -138,7 +138,6 @@ The next step is to estimate the proposed models, assess whether the hypothesize
     \item De Vries, L., Gensler, S. and Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
     \item Gkikas, D. C., Tzafilkou, K., Theodoridis, P. K., Garmpis, A. and Gkikas, M. C. (2022). How do text characteristics impact user engagement in social media posts? Modeling content readability, length, and hashtags number in Facebook. \textit{International Journal of Information Management Data Insights}, 2, 100067.
     \item Ko, E.E., Kim, D. and Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
-    \item Kumar, N., Qiu, L. and Kumar, S. (2022). A hashtag is worth a thousand words: An empirical investigation of social media strategies in trademarking hashtags. \textit{Information Systems Research}, 33(4), 1403--1427.
     \item Li, Y. and Xie, Y. (2020). Is a picture worth a thousand words? An empirical study of image content and social media engagement. \textit{Journal of Marketing Research}, 57(1), 1--19.
     \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M. and Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
     \item Moran, G., Muzellec, L. and Johnson, D. (2019). Message content features and social media engagement: evidence from the media industry. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
@@ -171,7 +170,7 @@ Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？
 
 第三，情緒正向程度（valence）反映貼文語句偏正面或偏負面。Reddy 與 Prakash（2024）指出，較正向情緒有助於提升社群互動與忠誠。在旅遊溝通中，由於訊息常依賴嚮往、興奮與愉悅想像，正向語氣預期能帶來更強反應。
 
-第四，hashtag 可能提升可發現性、組織主題意義，並將貼文連結至更廣泛對話。Kumar、Qiu 與 Kumar（2022）指出，hashtag 對提升社群受眾互動具有關鍵作用。對 Booking.com 而言，hashtag 有助於旅遊內容被搜尋與被看見，從而提高互動。
+第四，hashtag 可能提升可發現性、組織主題意義，並將貼文連結至更廣泛對話。Gkikas 等人（2022）實證指出，貼文特徵中的 hashtag 數量對提升社群互動率有顯著的正向貢獻。對 Booking.com 而言，hashtag 有助於旅遊內容被搜尋與被看見，從而提高互動。
 
 基於上述推論，提出以下假說：
 \begin{enumerate}[label=H\arabic*.]
@@ -202,7 +201,7 @@ Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？
 \endhead
 社群互動量 & 依變數 & 每篇貼文 likes、comments、shares 之加總 & 由 \texttt{like}、\texttt{comment}、\texttt{share} 推導 \\
 文字長度 & 主要自變數 & 移除 URL、mentions、hashtags 與非字母符號後，再過濾為可辨識英文詞彙之詞數 & \texttt{length} \\
-問號 & 主要自變數 & 貼文（移除 URL 後）問號數量 & \texttt{question} \\
+問號 & 主要自變數 & 虛擬變數（若貼文移除 URL 後含有一或多個問號則為 1，否則為 0） & \texttt{question} \\
 情緒正向程度 & 主要自變數 & 詞典法情緒分數，以中性為中心；值越高代表語氣越正向 & \texttt{valence} \\
 hashtag 數量 & 主要自變數 & 貼文中 hashtag 出現次數 & \texttt{hashtag} \\
 圖片 & 控制變數 & 貼文附帶圖片或視覺媒體數量 & \texttt{picture} \\
@@ -212,14 +211,14 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
 
-上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。問號以計數而非虛擬變數處理，可捕捉不同程度的互動語氣。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。基於文獻指出 emoji 有助於提升互動（Ko 等人，2022），本研究將 emoji 保留於延伸模型中，作為額外解釋力檢驗。
+上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。考量樣本中絕大多數含疑問語氣之貼文僅有單一問號，具有高度偏態，因此問號特徵以虛擬變數（dummy variable）處理，將重點聚焦於互動意圖的有無。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。基於文獻指出 emoji 有助於提升互動（Ko 等人，2022），本研究將 emoji 保留於延伸模型中，作為額外解釋力檢驗。
 
 \section{模型設定}
 基準模型檢驗四個核心文字特徵對互動的影響，並控制其他貼文特徵：
 
 \begin{equation}
 \begin{aligned}
-\text{Engagement}_i = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
 & + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i + \varepsilon_i
 \end{aligned}
 \end{equation}
@@ -234,7 +233,7 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 
 \begin{equation}
 \begin{aligned}
-\text{Engagement}_i = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
 & + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i \\
 & + \beta_8\text{Emoji}_i + \varepsilon_i
 \end{aligned}
@@ -257,7 +256,6 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
     \item De Vries, L., Gensler, S. and Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
     \item Gkikas, D. C., Tzafilkou, K., Theodoridis, P. K., Garmpis, A. and Gkikas, M. C. (2022). How do text characteristics impact user engagement in social media posts? Modeling content readability, length, and hashtags number in Facebook. \textit{International Journal of Information Management Data Insights}, 2, 100067.
     \item Ko, E.E., Kim, D. and Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
-    \item Kumar, N., Qiu, L. and Kumar, S. (2022). A hashtag is worth a thousand words: An empirical investigation of social media strategies in trademarking hashtags. \textit{Information Systems Research}, 33(4), 1403--1427.
     \item Li, Y. and Xie, Y. (2020). Is a picture worth a thousand words? An empirical study of image content and social media engagement. \textit{Journal of Marketing Research}, 57(1), 1--19.
     \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M. and Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
     \item Moran, G., Muzellec, L. and Johnson, D. (2019). Message content features and social media engagement: evidence from the media industry. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
