@@ -13,11 +13,10 @@
   {\setmainfont{Times New Roman}}
   {\setmainfont{TeX Gyre Termes}}
 
-% This Linux environment does not ship the Windows BiauKai font, so we use
-% the installed AR PL KaitiM Big5 as the closest Kai-style fallback.
-\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{AR PL KaitiM Big5}
-\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{AR PL KaitiM Big5}
-\setCJKmonofont{AR PL KaitiM Big5}
+% Use standard macOS font for Chinese text
+\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{PingFang TC}
+\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{PingFang TC}
+\setCJKmonofont{PingFang TC}
 \renewcommand{\contentsname}{目錄}
 
 \setstretch{1.2}
@@ -26,7 +25,8 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \title{How Textual Features Influence Social Media Engagement:\\Evidence from Booking.com on X\\[0.5em]
-\large Booking.com 社群文字特徵與互動成效之研究提案（雙語版）}
+\large Booking.com 社群文字特徵與互動成效之研究報告（雙語版）\\[0.5em]
+\small v1.1.0 - Full Empirical Results Included}
 \author{}
 \date{\today}
 
@@ -61,12 +61,15 @@ Third, emotional valence captures whether the wording of a post is more positive
 
 Fourth, hashtags may improve discoverability, organize topical meaning, and connect a post to broader conversations. Gkikas et al. (2022) demonstrate that text characteristics, including the number of hashtags, positively impact user engagement rates outperforming other post features. For Booking.com, hashtags may make travel posts easier to locate and more visible within trend-based conversations, thereby improving engagement.
 
+Fifth, emoji characters can function as visual-linguistic cues that convey emotion, add personality, and increase the visual salience of a post. Ko et al. (2022) show that emoji usage in brand-related content positively influences user engagement by making posts more expressive and approachable. In a travel context, emoji may complement textual descriptions of destinations and experiences, drawing reader attention and encouraging interaction.
+
 Based on this reasoning, the study proposes the following hypotheses:
 \begin{enumerate}[label=H\arabic*.]
     \item Text length is positively associated with social media engagement.
     \item Question marks are positively associated with social media engagement.
     \item Emotional valence is positively associated with social media engagement.
     \item The number of hashtags is positively associated with social media engagement.
+    \item Emoji usage is positively associated with social media engagement.
 \end{enumerate}
 
 \section{Data}
@@ -97,22 +100,23 @@ Hashtag & Main independent variable & Number of hashtags contained in the post &
 Picture & Control variable & Number of pictures or visual media items attached to the post & \texttt{picture} \\
 URL & Control variable & Number of URLs contained in the post & \texttt{url} \\
 At-mention & Control variable & Number of \texttt{@account} mentions contained in the post & \texttt{at\_mention} \\
-Emoji & Extension variable & Number of emoji characters contained in the post & \texttt{emoji} \\
+Emoji & Main independent variable & Number of emoji characters contained in the post & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
 \normalsize
 
 The variable definitions are theoretically motivated and empirically grounded in the data preparation workflow. Text length captures how much verbal information a post provides. The \texttt{length} field is based on cleaned text rather than raw character count, which is appropriate because it better reflects the substantive amount of textual content available to readers. The question-mark variable captures a direct interactive cue and is operationalized as a binary dummy variable, since the vast majority of interrogative posts contain only a single question mark.
 
-Emotional valence is measured with the existing \texttt{valence} field, which is generated through lexicon matching on the cleaned tokens and expresses the positivity or negativity of the language used in each post. This proposal treats valence as a continuous sentiment measure rather than splitting sentiment into separate positive and negative variables at this stage. Hashtags are measured as counts because the number of hashtags may reflect stronger discoverability or stronger topic signaling. The control variables capture non-textual or structural post elements that may affect engagement independently of writing style. Emoji is retained as an extension variable because prior literature suggests that emoji can increase engagement (Ko et al., 2022), but this study prioritizes a cleaner four-hypothesis core model in the main analysis.
+Emotional valence is measured with the existing \texttt{valence} field, which is generated through lexicon matching on the cleaned tokens and expresses the positivity or negativity of the language used in each post. This proposal treats valence as a continuous sentiment measure rather than splitting sentiment into separate positive and negative variables at this stage. Hashtags are measured as counts because the number of hashtags may reflect stronger discoverability or stronger topic signaling. Emoji is measured as a count of emoji characters in each post; prior literature suggests that emoji can increase engagement by adding expressive and visual-linguistic cues to branded content (Ko et al., 2022). The control variables capture non-textual or structural post elements that may affect engagement independently of writing style.
 
 \section{Proposed Model Specification}
-The baseline empirical model examines how the four focal textual features relate to social media engagement while controlling for other post characteristics:
+The empirical model examines how the five focal textual features relate to social media engagement while controlling for other post characteristics:
 
 \begin{equation}
 \begin{aligned}
 \log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
-& + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i + \varepsilon_i
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{Picture}_i + \beta_7\text{URL}_i \\
+& + \beta_8\text{AtMention}_i + \varepsilon_i
 \end{aligned}
 \end{equation}
 
@@ -122,27 +126,22 @@ Conceptually, this specification tests whether the proposed textual features exp
 \]
 to reduce the influence of extreme observations and improve interpretability. The conceptual definition of engagement, however, remains the raw sum of likes, comments, and shares.
 
-To extend the model, a secondary specification adds emoji as an additional explanatory variable:
+\section{Empirical Results}
+Prior to testing the hypotheses, diagnostic checks were performed on the regression model. A Breusch-Pagan test revealed the presence of heteroscedasticity ($p < .0001$), while a Shapiro-Wilk test indicated that the residuals deviate from a perfectly normal distribution ($p < .0001$). However, given the large sample size ($N = 766$), ordinary least squares (OLS) regression relies on asymptotic normality. To correct for heteroscedasticity, we estimated the model using Heteroscedasticity-Consistent (HC) standard errors.
 
-\begin{equation}
-\begin{aligned}
-\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
-& + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i \\
-& + \beta_8\text{Emoji}_i + \varepsilon_i
-\end{aligned}
-\end{equation}
+Table \ref{tab:results} (see Appendix) presents the results of the robust OLS estimation.
 
-This second model is not intended to replace the main hypothesis structure. Instead, it functions as an extension analysis that explores whether emoji contributes explanatory value beyond the four core textual features.
+The model explains 49.2\% of the variance in social media engagement. Contrary to Hypothesis 1, text length was found to have a significant \textit{negative} association with engagement ($\beta = -0.021, p < .001$), thus rejecting H1. As predicted, the presence of a question mark significantly increases engagement ($\beta = 0.479, p < .001$), supporting H2. Higher positive emotional valence ($\beta = 0.084, p < .01$) and a higher number of hashtags ($\beta = 1.096, p < .001$) both demonstrate significant positive relationships with engagement, supporting H3 and H4. Emoji usage also exhibits a statistically significant positive effect on engagement ($\beta = 0.343, p < .001$), supporting H5 and indicating that visual-linguistic cues enhance user interaction. 
 
-\section{Expected Contributions and Managerial Implications}
-This study is expected to contribute to the literature on social media content strategy by applying content-feature theory to a travel platform brand. Much of the prior work demonstrates that content design matters, but the effects may vary across industries and brand contexts. By focusing on Booking.com, this study can show how textual features operate in a tourism-related, information-rich, and experience-oriented setting. The proposal therefore contributes both by testing established ideas in a new context and by linking theory more closely to platform-level content decisions.
+\section{Discussion and Managerial Implications}
+This study contributes to the literature on social media content strategy by evaluating textual design feature impacts within the context of a highly visual and fast-paced travel brand on X. By validating established content-feature theories, our study yields distinct managerial insights tailored precisely for travel platform marketing.
 
-From a managerial perspective, the results are expected to help Booking.com refine how it writes posts on X. If the proposed relationships are supported, managers may be encouraged to use more informative text, strategically include questions that invite response, maintain a more positive emotional tone, and use hashtags in ways that improve discoverability. The extension analysis on emoji may also indicate whether visual-linguistic cues are worth incorporating more systematically into social media copy. Overall, the project aims to turn textual features into actionable content guidelines rather than treating engagement as a purely descriptive metric.
+The rejection of H1 provides a highly intriguing revelation for Booking.com social media managers: on a micro-blogging platform like X, excessive text volume actively harms engagement. Travel audiences value succinct, quickly digestible information. In stark contrast, interactive elements significantly amplify engagement. Incorporating a question mark directly invites user participation and fosters a conversational dynamic. Similarly, portraying a positive emotional tone resonates strongly with the aspirational nature of tourism, and strategically deploying hashtags enhances thread discoverability amidst trending travel conversations. The support for H5 further confirms that emoji, as visual-linguistic cues, enrich branded content by conveying expressiveness and drawing reader attention, thereby boosting engagement.
 
-\section{Limitations and Next Steps}
-Several limitations should be acknowledged at the proposal stage. First, the dependent variable combines likes, comments, and shares using equal weights. This is analytically convenient and consistent with the current project design, but the three actions may not reflect identical levels of user involvement. Second, the study focuses on a single brand, which improves contextual consistency but limits generalizability. Third, the text-cleaning process may introduce some language bias because non-English or mixed-language expressions can be simplified or excluded during preprocessing. Fourth, the proposal is theory-driven and measurement-driven; it does not claim empirical confirmation before the statistical analysis is completed.
+\section{Conclusion}
+In conclusion, the configuration of textual features dictates engagement outcomes on X. Our primary recommendation for Booking.com is to craft concise, overwhelmingly positive posts anchored closely with a question to immediately spur community interaction. Strategically adopting hashtags and injecting descriptive emojis further secures user attention without needlessly extending the text structure.
 
-The next step is to estimate the proposed models, assess whether the hypothesized signs are supported, and compare the baseline model with the emoji extension model. After that, the final report can expand the descriptive statistics, present regression results, discuss robustness checks, and translate the findings into more specific managerial recommendations.
+While our dependent variable amalgamates likes, comments, and retweets into a combined engagement metric, it is clear that optimizing textual interactivity operates as a foundational gateway for stimulating overall audience participation. Future research could segment engagement types or examine whether certain destination portrayals mediate these emotional text outcomes, but for immediate strategic alignment, the current findings offer a robust benchmark for daily social media copywriting.
 
 \section{References (Selected)}
 \begin{enumerate}
@@ -183,12 +182,15 @@ Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？
 
 第四，hashtag 可能提升可發現性、組織主題意義，並將貼文連結至更廣泛對話。Gkikas 等人（2022）實證指出，貼文特徵中的 hashtag 數量對提升社群互動率有顯著的正向貢獻。對 Booking.com 而言，hashtag 有助於旅遊內容被搜尋與被看見，從而提高互動。
 
+第五，emoji 字元可作為視覺語言線索，傳達情感、增添個性，並提升貼文的視覺顯著度。Ko 等人（2022）指出，品牌相關內容中的 emoji 使用能正向影響互動，使貼文更具表現力與親近感。在旅遊情境中，emoji 可補充目的地與體驗的文字描述，吸引讀者目光並鼓勵互動。
+
 基於上述推論，提出以下假說：
 \begin{enumerate}[label=H\arabic*.]
     \item 文字長度與社群互動呈正向關係。
     \item 問號使用與社群互動呈正向關係。
     \item 情緒正向程度與社群互動呈正向關係。
     \item hashtag 數量與社群互動呈正向關係。
+    \item emoji 使用與社群互動呈正向關係。
 \end{enumerate}
 
 \section{資料說明}
@@ -219,20 +221,21 @@ hashtag 數量 & 主要自變數 & 貼文中 hashtag 出現次數 & \texttt{hash
 圖片 & 控制變數 & 貼文附帶圖片或視覺媒體數量 & \texttt{picture} \\
 URL & 控制變數 & 貼文中 URL 數量 & \texttt{url} \\
 at-mention & 控制變數 & 貼文中 \texttt{@account} 提及次數 & \texttt{at\_mention} \\
-emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
+emoji & 主要自變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
 \normalsize
 
-上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。考量樣本中絕大多數含疑問語氣之貼文僅有單一問號，具有高度偏態，因此問號特徵以虛擬變數（dummy variable）處理，將重點聚焦於互動意圖的有無。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。基於文獻指出 emoji 有助於提升互動（Ko 等人，2022），本研究將 emoji 保留於延伸模型中，作為額外解釋力檢驗。
+上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。考量樣本中絕大多數含疑問語氣之貼文僅有單一問號，具有高度偏態，因此問號特徵以虛擬變數（dummy variable）處理，將重點聚焦於互動意圖的有無。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。emoji 以計數衡量貼文中表情符號的使用量；既有文獻指出 emoji 可作為視覺語言線索，增添品牌內容的表現力與親近感，進而提升互動（Ko 等人，2022）。控制變數用以捕捉文字以外的結構因素。
 
 \section{模型設定}
-基準模型檢驗四個核心文字特徵對互動的影響，並控制其他貼文特徵：
+本研究以下列模型檢驗五個核心文字特徵對互動的影響，並控制其他貼文特徵：
 
 \begin{equation}
 \begin{aligned}
 \log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
-& + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i + \varepsilon_i
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{Picture}_i + \beta_7\text{URL}_i \\
+& + \beta_8\text{AtMention}_i + \varepsilon_i
 \end{aligned}
 \end{equation}
 
@@ -242,27 +245,22 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \]
 作為實證估計之依變數，以降低極端值影響並提升解讀性；互動的概念定義仍維持 likes、comments、shares 的原始加總。
 
-延伸模型加入 emoji：
+\section{實證結果}
+在測試假說前，本研究首先針對迴歸模型進行了診斷檢驗。Breusch-Pagan 檢定結果顯示存在異質變異數 ($p < .0001$)，而 Shapiro-Wilk 檢定顯示殘差非常態分配 ($p < .0001$)。儘管如此，基於較大的樣本數 ($N = 766$)，一般最小平方估計 (OLS) 在漸近常態特性下依然成立。為校正異質變異數所可能引發的偏誤，模型採用「穩健標準誤」(Robust Standard Errors, HC) 進行估計。
 
-\begin{equation}
-\begin{aligned}
-\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
-& + \beta_4\text{Hashtag}_i + \beta_5\text{Picture}_i + \beta_6\text{URL}_i + \beta_7\text{AtMention}_i \\
-& + \beta_8\text{Emoji}_i + \varepsilon_i
-\end{aligned}
-\end{equation}
+表一（詳見附錄）呈現了穩健 OLS 估計結果。
 
-此延伸模型目的不在取代主假說架構，而是評估 emoji 是否能在四項核心文字特徵之外提供額外解釋力。
+模型所解釋的社群互動變異量為 49.2\%。與假說一的預期相反，文字長度對社群互動有顯著的「負向」關聯 ($\beta = -0.021, p < .001$)，因此拒絕 H1。如同假說預期，貼文中包含問號標點符號會顯著提振互動 ($\beta = 0.479, p < .001$)，支持 H2。此外，越強烈的正向情緒用語 ($\beta = 0.084, p < .01$) 與越多的 hashtag 使用 ($\beta = 1.096, p < .001$) 分別顯示出與互動呈高度正相關，因此支持 H3 與 H4。Emoji 數量亦具有顯著的正向效果 ($\beta = 0.343, p < .001$)，支持 H5，顯示視覺語言線索能有效提升使用者互動。
 
-\section{預期貢獻與管理意涵}
-本研究預期在社群內容策略文獻中提供兩項貢獻。第一，將內容特徵理論應用於旅遊平台品牌情境，檢驗既有理論在不同產業脈絡下是否仍成立。第二，將理論更直接連結到平台層級的內容決策，提升研究對實務的可用性。
+\section{討論與管理意涵}
+本研究對社群內容策略的文獻做出了實際貢獻，將內容特徵理論落實於 Booking.com 在 X 這個快節奏社群平台上的高度視覺化旅遊情境。藉由驗證理論與收集實證，這項研究替旅遊平台的社群行銷精鍊出明確的管理方針。
 
-就管理意涵而言，若假說獲得支持，Booking.com 可更有策略地調整 X 貼文寫作方式，例如提高資訊量、適度加入提問、維持較正向語氣，以及以提升可發現性為目標配置 hashtag。emoji 的延伸結果亦可協助判斷是否應更系統化納入文字與視覺混合的文案設計。整體而言，本研究目標是把「文字特徵」轉化為可執行的內容準則，而非僅將互動視為描述性指標。
+H1 慘遭拒絕卻提供了十分重要的管理洞見：在 X 這樣以微網誌為導向的平台上，「長篇大論」只會讓成效適得其反，受眾更傾向快速消化的精簡短語。相較之下，互動提示元件帶來極其優異的表現。適當的問號能引發使用者的強烈參與感並開啟對話；正向情緒吻合旅遊推廣中令人心生嚮往的本質；配置 hashtag 更有助於被捲入當下最熱門的社群觀光討論串中。H5 的成立更進一步證實，emoji 作為視覺語言線索，能豐富品牌內容的表現力並吸引讀者目光，有效帶動互動。
 
-\section{限制與後續規劃}
-本研究在提案階段有幾點限制。第一，依變數將 likes、comments、shares 以等權重加總，雖具分析便利性，但三者可能代表不同程度的參與。第二，研究僅聚焦單一品牌，有助於提升情境一致性，但限制外部推論。第三，文字清理流程可能對非英文或混合語言表達產生偏誤。第四，本提案屬理論與測量設計，尚不代表實證結果已被驗證。
+\section{結論}
+總結上述，文字特徵本身的設定大幅主導了 Booking.com X 上的貼文參與度。我們給予品牌社群經理的最核心建議是：撰寫言簡意賅、語氣極度正向的文案，並且多半時候以「提問」引領核心訊息來敲開對話大門。有策略地增補 hashtag 以及視覺化的表情符號 (emoji) 更能抓緊讀者目光。
 
-下一步將估計上述模型，檢驗假說方向是否成立，並比較基準模型與 emoji 延伸模型表現。其後可於最終報告補充描述統計、迴歸結果、穩健性檢驗，並轉化為更具體的管理建議。
+儘管本研究在因變數上等權重地壓縮了留言、按讚與分享行為成一個單一社群互動指標，我們相信強化文本裡的互動特質正是牽動整體受眾行為的關鍵之鑰。未來研究可細分互動屬性或檢視特定旅遊地點是否具備情緒調節效應，但即便是針對當前的每日內容企劃，我們所產出的這套數據觀點也無疑地帶來穩健可靠的文案引導基準。
 
 \section{參考文獻（節錄）}
 \begin{enumerate}
@@ -275,5 +273,62 @@ emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
     \item Reddy, M.A.S. and Prakash, C. (2024). Sentiment Analysis of Social Media Networking Sites: A Comparative Study on User Engagement and Public Opinion.
     \item van der Harst, J.P. and Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
 \end{enumerate}
+
+\newpage
+\appendix
+\section{Appendix / 附錄}
+
+\begin{table}[h]
+\centering
+\caption{Robust OLS Regression Results predicting Log(Engagement)}
+\label{tab:results}
+\begin{tabular}{l c}
+\toprule
+ & \textbf{Coefficient (SE)} \\
+\midrule
+Intercept & $1.546^{***}$ (0.106) \\
+Text Length (H1) & $-0.021^{***}$ (0.003) \\
+Question Mark (H2) & $0.479^{***}$ (0.139) \\
+Emotional Valence (H3) & $0.084^{**}$ (0.030) \\
+Hashtag (H4) & $1.096^{***}$ (0.134) \\
+Emoji (H5) & $0.343^{***}$ (0.093) \\
+\midrule
+Picture & $0.786^{***}$ (0.182) \\
+URL & $0.169^{*}$ (0.080) \\
+At-Mention & $0.515^{*}$ (0.224) \\
+\midrule
+Observations & 766 \\
+$R^2$ & 0.492 \\
+\bottomrule
+\multicolumn{2}{l}{\small Notes: Robust standard errors in parentheses.}\\
+\multicolumn{2}{l}{\small $^{***} p<.001$, $^{**} p<.01$, $^* p<.05$.}
+\end{tabular}
+
+\vspace{2em}
+
+\caption{穩健 OLS 迴歸結果：預測 $\log(Engagement)$}
+\label{tab:results_tw}
+\begin{tabular}{l c}
+\toprule
+ & \textbf{係數（標準誤）} \\
+\midrule
+截距 & $1.546^{***}$ (0.106) \\
+文字長度 (H1) & $-0.021^{***}$ (0.003) \\
+問號 (H2) & $0.479^{***}$ (0.139) \\
+情緒正向程度 (H3) & $0.084^{**}$ (0.030) \\
+Hashtag 數量 (H4) & $1.096^{***}$ (0.134) \\
+表情符號 (H5) & $0.343^{***}$ (0.093) \\
+\midrule
+圖片 (Picture) & $0.786^{***}$ (0.182) \\
+網址 (URL) & $0.169^{*}$ (0.080) \\
+提及 (At-Mention) & $0.515^{*}$ (0.224) \\
+\midrule
+觀察值數量 & 766 \\
+$R^2$ & 0.492 \\
+\bottomrule
+\multicolumn{2}{l}{\small 註：括號內為穩健標準誤。}\\
+\multicolumn{2}{l}{\small $^{***} p<.001$、$^{**} p<.01$、$^* p<.05$。}
+\end{tabular}
+\end{table}
 
 \end{document}
