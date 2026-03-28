@@ -1,20 +1,29 @@
-\documentclass[12pt,a4paper]{ctexart}
+\documentclass[12pt,a4paper,fontset=none]{ctexart}
 \usepackage[margin=1in]{geometry}
 \usepackage{setspace}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{array}
 \usepackage{amsmath,amssymb}
 \usepackage{hyperref}
 \usepackage{enumitem}
 
-% Force Traditional Chinese-capable fonts to prevent missing glyph boxes.
-\setCJKmainfont{AR PL UMing TW}
-\setCJKsansfont{Droid Sans Fallback}
-\setCJKmonofont{AR PL UMing TW}
+% English text: prefer Times New Roman, fall back to a Times-compatible font.
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+% This Linux environment does not ship the Windows BiauKai font, so we use
+% the installed AR PL KaitiM Big5 as the closest Kai-style fallback.
+\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{AR PL KaitiM Big5}
+\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{AR PL KaitiM Big5}
+\setCJKmonofont{AR PL KaitiM Big5}
+\renewcommand{\contentsname}{目錄}
 
 \setstretch{1.2}
 \setlength{\parskip}{0.5em}
 \setlength{\parindent}{2em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \title{How Textual Features Influence Social Media Engagement:\\Evidence from Booking.com on X\\[0.5em]
 \large Booking.com 社群文字特徵與互動成效之研究提案（雙語版）}
@@ -70,7 +79,8 @@ The dataset is suitable for the proposed analysis because it already includes th
 \section{Measurement of Variables}
 This study operationalizes all variables using fields that already exist in the cleaned dataset and the preprocessing logic documented in \texttt{py\_export/single/final\_report\_full.py}. The main variables are defined as follows.
 
-\begin{longtable}{p{0.21\textwidth} p{0.18\textwidth} p{0.41\textwidth} p{0.16\textwidth}}
+\small
+\begin{longtable}{@{}L{0.20\textwidth} L{0.18\textwidth} L{0.36\textwidth} L{0.14\textwidth}@{}}
 \toprule
 Construct & Role & Operational definition & Dataset field \\
 \midrule
@@ -90,6 +100,7 @@ At-mention & Control variable & Number of \texttt{@account} mentions contained i
 Emoji & Extension variable & Number of emoji characters contained in the post & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
+\normalsize
 
 The variable definitions are theoretically motivated and empirically grounded in the data preparation workflow. Text length captures how much verbal information a post provides. The \texttt{length} field is based on cleaned text rather than raw character count, which is appropriate because it better reflects the substantive amount of textual content available to readers. The question-mark variable captures a direct interactive cue and is operationalized as a binary dummy variable, since the vast majority of interrogative posts contain only a single question mark.
 
@@ -190,7 +201,8 @@ Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？
 \section{變數衡量}
 本研究所有變數皆以現有清理資料欄位操作化，並對應 \texttt{py\_export/single/final\_report\_full.py} 的前處理邏輯。主要變數定義如下。
 
-\begin{longtable}{p{0.20\textwidth} p{0.18\textwidth} p{0.43\textwidth} p{0.15\textwidth}}
+\small
+\begin{longtable}{@{}L{0.18\textwidth} L{0.16\textwidth} L{0.40\textwidth} L{0.14\textwidth}@{}}
 \toprule
 構念 & 角色 & 操作型定義 & 資料欄位 \\
 \midrule
@@ -210,6 +222,7 @@ at-mention & 控制變數 & 貼文中 \texttt{@account} 提及次數 & \texttt{a
 emoji & 延伸變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \bottomrule
 \end{longtable}
+\normalsize
 
 上述變數設定兼具理論與實務可行性。\texttt{length} 以清理後詞數而非原始字元數衡量，較能反映讀者可接收的實質文字資訊量。考量樣本中絕大多數含疑問語氣之貼文僅有單一問號，具有高度偏態，因此問號特徵以虛擬變數（dummy variable）處理，將重點聚焦於互動意圖的有無。\texttt{valence} 以連續分數呈現語言正負向程度，暫不拆分為正面與負面兩個獨立構面。hashtag 以計數表示主題標記與可發現性強度。控制變數用以捕捉文字以外的結構因素。基於文獻指出 emoji 有助於提升互動（Ko 等人，2022），本研究將 emoji 保留於延伸模型中，作為額外解釋力檢驗。
 
