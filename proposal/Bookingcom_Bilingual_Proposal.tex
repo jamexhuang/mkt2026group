@@ -26,7 +26,7 @@
 
 \title{How Textual Features Influence Social Media Engagement:\\Evidence from Booking.com on X\\[0.5em]
 \large Booking.com 社群文字特徵與互動成效之研究報告（雙語版）\\[0.5em]
-\small v1.1.0 - Full Empirical Results Included}
+\small v1.2.0 - Descriptive Statistics \& Correlation Tables Added}
 \author{}
 \date{\today}
 
@@ -129,7 +129,7 @@ to reduce the influence of extreme observations and improve interpretability. Th
 \section{Empirical Results}
 Prior to testing the hypotheses, diagnostic checks were performed on the regression model. A Breusch-Pagan test revealed the presence of heteroscedasticity ($p < .0001$), while a Shapiro-Wilk test indicated that the residuals deviate from a perfectly normal distribution ($p < .0001$). However, given the large sample size ($N = 766$), ordinary least squares (OLS) regression relies on asymptotic normality. To correct for heteroscedasticity, we estimated the model using Heteroscedasticity-Consistent (HC) standard errors.
 
-Table \ref{tab:results} (see Appendix) presents the results of the robust OLS estimation.
+Table \ref{tab:desc} presents the descriptive statistics of all variables. Table \ref{tab:corr} presents the Pearson correlation matrix (lower triangle only). Table \ref{tab:results} presents the results of the robust OLS estimation.
 
 The model explains 49.2\% of the variance in social media engagement. Contrary to Hypothesis 1, text length was found to have a significant \textit{negative} association with engagement ($\beta = -0.021, p < .001$), thus rejecting H1. As predicted, the presence of a question mark significantly increases engagement ($\beta = 0.479, p < .001$), supporting H2. Higher positive emotional valence ($\beta = 0.084, p < .01$) and a higher number of hashtags ($\beta = 1.096, p < .001$) both demonstrate significant positive relationships with engagement, supporting H3 and H4. Emoji usage also exhibits a statistically significant positive effect on engagement ($\beta = 0.343, p < .001$), supporting H5 and indicating that visual-linguistic cues enhance user interaction. 
 
@@ -248,7 +248,7 @@ emoji & 主要自變數 & 貼文中 emoji 字元數量 & \texttt{emoji} \\
 \section{實證結果}
 在測試假說前，本研究首先針對迴歸模型進行了診斷檢驗。Breusch-Pagan 檢定結果顯示存在異質變異數 ($p < .0001$)，而 Shapiro-Wilk 檢定顯示殘差非常態分配 ($p < .0001$)。儘管如此，基於較大的樣本數 ($N = 766$)，一般最小平方估計 (OLS) 在漸近常態特性下依然成立。為校正異質變異數所可能引發的偏誤，模型採用「穩健標準誤」(Robust Standard Errors, HC) 進行估計。
 
-表一（詳見附錄）呈現了穩健 OLS 估計結果。
+表 \ref{tab:desc} 呈現所有變數的敘述統計。表 \ref{tab:corr} 呈現 Pearson 相關矩陣（僅顯示下三角）。表 \ref{tab:results} 呈現了穩健 OLS 估計結果。
 
 模型所解釋的社群互動變異量為 49.2\%。與假說一的預期相反，文字長度對社群互動有顯著的「負向」關聯 ($\beta = -0.021, p < .001$)，因此拒絕 H1。如同假說預期，貼文中包含問號標點符號會顯著提振互動 ($\beta = 0.479, p < .001$)，支持 H2。此外，越強烈的正向情緒用語 ($\beta = 0.084, p < .01$) 與越多的 hashtag 使用 ($\beta = 1.096, p < .001$) 分別顯示出與互動呈高度正相關，因此支持 H3 與 H4。Emoji 數量亦具有顯著的正向效果 ($\beta = 0.343, p < .001$)，支持 H5，顯示視覺語言線索能有效提升使用者互動。
 
@@ -278,7 +278,67 @@ H1 慘遭拒絕卻提供了十分重要的管理洞見：在 X 這樣以微網�
 \appendix
 \section{Appendix / 附錄}
 
-\begin{table}[h]
+% ============================================================
+% Table 1 — Descriptive Statistics / 敘述統計
+% ============================================================
+\begin{table}[htbp]
+\centering
+\caption{Descriptive Statistics / 敘述統計（N = 766）}
+\label{tab:desc}
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Variable / 變數 & Mean & SD & Min & Q1 & Median & Q3 & Max & Skewness \\
+\midrule
+log(1+Engagement) & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+Text Length (words) & 23.45 & 12.26 & 0.000 & 14.00 & 22.00 & 33.00 & 53.00 & 0.239 \\
+Question Mark (0/1) & 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
+Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.047 & 3.948 & 0.371 \\
+Hashtag Count & 0.145 & 0.489 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 3.817 \\
+Emoji Count & 0.398 & 0.884 & 0.000 & 0.000 & 0.000 & 1.000 & 13.000 & 5.261 \\
+Picture Count & 0.309 & 0.524 & 0.000 & 0.000 & 0.000 & 1.000 & 4.000 & 1.875 \\
+URL Count & 0.919 & 0.719 & 0.000 & 0.000 & 1.000 & 1.000 & 2.000 & 0.121 \\
+At-Mention Count & 0.097 & 0.356 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 4.276 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{1em}
+
+% ============================================================
+% Table 2 — Pearson Correlation Matrix (lower triangle)
+% Note: *** p<.001  ** p<.01  * p<.05
+% ============================================================
+\begin{table}[htbp]
+\centering
+\caption{Pearson Correlation Matrix / Pearson 相關矩陣（下三角，N = 766）}
+\label{tab:corr}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
+\midrule
+(1) log(1+Eng.) & 1 & & & & & & & & \\
+(2) Text Length & $-0.184^{***}$ & 1 & & & & & & & \\
+(3) Question Mk. & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
+(4) Emot. Valence & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
+(5) Hashtag Ct. & $0.452^{***}$ & $-0.012$ & $0.075^{*}$ & $0.047$ & 1 & & & & \\
+(6) Emoji Ct. & $0.411^{***}$ & $-0.044$ & $0.206^{***}$ & $0.257^{***}$ & $0.087^{*}$ & 1 & & & \\
+(7) Picture Ct. & $0.451^{***}$ & $-0.027$ & $0.163^{***}$ & $0.312^{***}$ & $0.044$ & $0.423^{***}$ & 1 & & \\
+(8) URL Ct. & $0.318^{***}$ & $0.063$ & $-0.018$ & $0.175^{***}$ & $0.193^{***}$ & $0.154^{***}$ & $0.501^{***}$ & 1 & \\
+(9) At-Mention Ct. & $0.319^{***}$ & $0.035$ & $0.026$ & $0.056$ & $0.460^{***}$ & $0.127^{***}$ & $0.043$ & $0.102^{**}$ & 1 \\
+\bottomrule
+\multicolumn{10}{l}{\small $^{***}\,p<.001$,\; $^{**}\,p<.01$,\; $^*\,p<.05$.} \\
+\end{tabular}
+\end{table}
+
+\vspace{1em}
+
+% ============================================================
+% Table 3 — Robust OLS Regression Results
+% ============================================================
+\begin{table}[htbp]
 \centering
 \caption{Robust OLS Regression Results predicting Log(Engagement)}
 \label{tab:results}
@@ -300,17 +360,17 @@ At-Mention & $0.515^{*}$ (0.224) \\
 Observations & 766 \\
 $R^2$ & 0.492 \\
 \bottomrule
-\multicolumn{2}{l}{\small Notes: Robust standard errors in parentheses.}\\
+\multicolumn{2}{l}{\small Notes: Robust (HC) standard errors in parentheses.}\\
 \multicolumn{2}{l}{\small $^{***} p<.001$, $^{**} p<.01$, $^* p<.05$.}
 \end{tabular}
 
 \vspace{2em}
 
-\caption{穩健 OLS 迴歸結果：預測 $\log(Engagement)$}
+\caption{穩健 OLS 迴歸結果：預測 $\log(1+\text{Engagement})$}
 \label{tab:results_tw}
 \begin{tabular}{l c}
 \toprule
- & \textbf{係數（標準誤）} \\
+ & \textbf{係數（穩健標準誤）} \\
 \midrule
 截距 & $1.546^{***}$ (0.106) \\
 文字長度 (H1) & $-0.021^{***}$ (0.003) \\
@@ -326,7 +386,7 @@ Hashtag 數量 (H4) & $1.096^{***}$ (0.134) \\
 觀察值數量 & 766 \\
 $R^2$ & 0.492 \\
 \bottomrule
-\multicolumn{2}{l}{\small 註：括號內為穩健標準誤。}\\
+\multicolumn{2}{l}{\small 註：括號內為穩健標準誤（HC）。}\\
 \multicolumn{2}{l}{\small $^{***} p<.001$、$^{**} p<.01$、$^* p<.05$。}
 \end{tabular}
 \end{table}
