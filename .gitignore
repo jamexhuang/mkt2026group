@@ -3,9 +3,13 @@
 *.aux
 *.toc
 *.out
+*.xdv
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.synctex(busy)
+*.bcf
+*.run.xml
 *.bbl
 *.blg
 *.lof
