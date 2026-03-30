@@ -1,0 +1,682 @@
+\documentclass[12pt,a4paper,fontset=none]{ctexart}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+% English text: prefer Times New Roman, fall back to a Times-compatible font.
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+% Use available Chinese fonts with fallback
+\IfFontExistsTF{PingFang TC}
+  {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{PingFang TC}}
+  {\setCJKmainfont{WenQuanYi Zen Hei}}
+\IfFontExistsTF{PingFang TC}
+  {\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{PingFang TC}}
+  {\setCJKsansfont{WenQuanYi Zen Hei}}
+\IfFontExistsTF{PingFang TC}
+  {\setCJKmonofont{PingFang TC}}
+  {\setCJKmonofont{WenQuanYi Zen Hei}}
+\renewcommand{\contentsname}{目錄}
+
+\setstretch{1.2}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{2em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Booking.com Social Media Engagement Study\\
+Complete Results Report with Verification\\[0.5em]
+\large Booking.com 社群文字特徵與互動成效完整結果報告\\[0.5em]
+\small Generated: 2026-03-30}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Executive Summary / 執行摘要}
+\addcontentsline{toc}{section}{Executive Summary / 執行摘要}
+
+This report presents the complete statistical analysis results for the Booking.com social media engagement study. All analyses were conducted using Python v2.0.0 statistical scripts with robust standard errors (HC1) to account for heteroscedasticity. The results confirm the hypotheses and model specifications outlined in the original proposal.
+
+本報告呈現 Booking.com 社群媒體互動研究的完整統計分析結果。所有分析均使用 Python v2.0.0 統計腳本執行，並採用穩健標準誤 (HC1) 以應對異質變異數問題。結果證實了原始提案中概述的假設和模型規格。
+
+\section{Research Framework Verification / 研究架構驗證}
+
+\subsection{Research Question / 研究問題}
+\textbf{How do textual features in Booking.com's posts on X influence social media engagement?}
+
+Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？
+
+\subsection{Hypotheses / 研究假說}
+
+The study tests five main hypotheses:
+
+\begin{enumerate}[label=H\arabic*.]
+    \item Text length is positively associated with social media engagement.
+    \item Question marks are positively associated with social media engagement.
+    \item Emotional valence is positively associated with social media engagement.
+    \item The number of hashtags is positively associated with social media engagement.
+    \item Emoji usage is positively associated with social media engagement.
+\end{enumerate}
+
+\subsection{Model Specification / 模型規格}
+
+The empirical model examines how five focal textual features relate to social media engagement while controlling for other post characteristics:
+
+\begin{equation}
+\begin{aligned}
+\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{Picture}_i + \beta_7\text{URL}_i \\
+& + \beta_8\text{AtMention}_i + \varepsilon_i
+\end{aligned}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$
+    \item The dependent variable is log-transformed as $\log(1 + \text{Engagement}_i)$ to address right-skewness
+    \item Independent variables: TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
+    \item Control variables: Picture, URL, AtMention
+\end{itemize}
+
+\section{Data Description / 資料說明}
+
+\subsection{Dataset Characteristics / 資料集特徵}
+
+\begin{itemize}
+    \item \textbf{Sample Size:} N = 766 posts from Booking.com's official X account
+    \item \textbf{Time Period:} November 1, 2021 to November 21, 2022
+    \item \textbf{Data Source:} \texttt{data/research\_data.csv}
+    \item \textbf{Variables:} 38 columns including raw engagement metrics, textual features, and control variables
+\end{itemize}
+
+\subsection{Variable Definitions / 變數定義}
+
+\begin{table}[H]
+\centering
+\caption{Variable Definitions and Operationalization}
+\small
+\begin{tabular}{@{}p{0.20\textwidth} p{0.18\textwidth} p{0.42\textwidth}@{}}
+\toprule
+Construct & Role & Operational Definition \\
+\midrule
+Social Media Engagement & Dependent Variable & Sum of likes, comments, and shares; log-transformed as $\log(1+\text{Engagement})$ \\
+\midrule
+Text Length & Main IV (H1) & Number of cleaned English words after preprocessing \\
+Question Mark & Main IV (H2) & Binary dummy (1 if post contains '?', else 0) \\
+Emotional Valence & Main IV (H3) & Lexicon-based sentiment score (higher = more positive) \\
+Hashtag Count & Main IV (H4) & Number of hashtags in the post \\
+Emoji Count & Main IV (H5) & Number of emoji characters in the post \\
+\midrule
+Picture Count & Control Variable & Number of pictures attached to the post \\
+URL Count & Control Variable & Number of URLs in the post \\
+At-Mention Count & Control Variable & Number of @mentions in the post \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Descriptive Statistics / 敘述統計}
+
+\subsection{Summary Statistics / 摘要統計}
+
+Table \ref{tab:desc_full} presents comprehensive descriptive statistics for all variables in the analysis.
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics (N = 766)}
+\label{tab:desc_full}
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Variable & Mean & SD & Min & Q1 & Median & Q3 & Max & Skew \\
+\midrule
+log(1+Engagement) & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+Text Length (words) & 23.45 & 12.26 & 0.000 & 14.00 & 22.00 & 33.00 & 53.00 & 0.239 \\
+Question Mark (0/1) & 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
+Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.047 & 3.948 & 0.371 \\
+Hashtag Count & 0.145 & 0.489 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 3.817 \\
+Emoji Count & 0.398 & 0.884 & 0.000 & 0.000 & 0.000 & 1.000 & 13.000 & 5.261 \\
+Picture Count & 0.309 & 0.524 & 0.000 & 0.000 & 0.000 & 1.000 & 4.000 & 1.875 \\
+URL Count & 0.919 & 0.719 & 0.000 & 0.000 & 1.000 & 1.000 & 2.000 & 0.121 \\
+At-Mention Count & 0.097 & 0.356 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 4.276 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Observations / 關鍵觀察}
+
+\begin{itemize}
+    \item \textbf{Engagement Distribution:} The log-transformed engagement variable shows positive skewness (1.001), indicating some high-engagement posts drive the distribution.
+    \item \textbf{Text Length:} Posts average 23.45 words with relatively low skewness (0.239), suggesting a roughly symmetric distribution.
+    \item \textbf{Question Mark Usage:} Only 16.7\% of posts contain question marks, making this a relatively rare feature.
+    \item \textbf{Hashtags:} Average of 0.145 hashtags per post with high skewness (3.817), indicating most posts have no hashtags.
+    \item \textbf{Emoji Usage:} Average of 0.398 emojis per post with very high skewness (5.261), showing sparse but occasionally heavy usage.
+\end{itemize}
+
+\subsection{Frequency Distribution: Question Mark / 問號使用頻率分布}
+
+\begin{table}[H]
+\centering
+\caption{Question Mark Frequency Distribution}
+\small
+\begin{tabular}{lrr}
+\toprule
+Question Mark & Frequency & Percent (\%) \\
+\midrule
+0 (No) & 638 & 83.29 \\
+1 (Yes) & 128 & 16.71 \\
+\midrule
+Total & 766 & 100.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Correlation Analysis / 相關分析}
+
+\subsection{Pearson Correlation Matrix / Pearson 相關矩陣}
+
+Table \ref{tab:corr_full} presents the Pearson correlation matrix with significance indicators.
+
+\begin{table}[H]
+\centering
+\caption{Pearson Correlation Matrix (Lower Triangle, N = 766)}
+\label{tab:corr_full}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
+\midrule
+(1) log(1+Eng.) & 1 & & & & & & & & \\
+(2) Text Length & $-0.184^{***}$ & 1 & & & & & & & \\
+(3) Question Mk. & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
+(4) Emot. Valence & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
+(5) Hashtag Ct. & $0.452^{***}$ & $-0.012$ & $0.075^{*}$ & $0.047$ & 1 & & & & \\
+(6) Emoji Ct. & $0.411^{***}$ & $-0.044$ & $0.206^{***}$ & $0.257^{***}$ & $0.087^{*}$ & 1 & & & \\
+(7) Picture Ct. & $0.451^{***}$ & $-0.027$ & $0.163^{***}$ & $0.312^{***}$ & $0.044$ & $0.423^{***}$ & 1 & & \\
+(8) URL Ct. & $0.318^{***}$ & $0.063$ & $-0.018$ & $0.175^{***}$ & $0.193^{***}$ & $0.154^{***}$ & $0.501^{***}$ & 1 & \\
+(9) At-Mention Ct. & $0.319^{***}$ & $0.035$ & $0.026$ & $0.056$ & $0.460^{***}$ & $0.127^{***}$ & $0.043$ & $0.102^{**}$ & 1 \\
+\bottomrule
+\multicolumn{10}{l}{\small $^{***}\,p<.001$,\; $^{**}\,p<.01$,\; $^*\,p<.05$ (two-tailed).} \\
+\end{tabular}
+\end{table}
+
+\subsection{Key Correlation Findings / 關鍵相關發現}
+
+\begin{itemize}
+    \item \textbf{Negative Text Length Correlation:} Text length shows a significant negative correlation with engagement ($r = -0.184, p < .001$), foreshadowing H1 rejection.
+    \item \textbf{Strong Positive Correlations:} Hashtag count ($r = 0.452$), picture count ($r = 0.451$), and emoji count ($r = 0.411$) show the strongest positive correlations with engagement.
+    \item \textbf{Multicollinearity Check:} No correlation exceeds 0.8, and subsequent VIF analysis confirms no serious multicollinearity issues.
+    \item \textbf{Question Mark Effect:} Significant positive correlation ($r = 0.262, p < .001$) supports H2.
+\end{itemize}
+
+\newpage
+
+\section{Regression Analysis / 迴歸分析}
+
+\subsection{Model Diagnostics / 模型診斷}
+
+Before presenting the main results, we conducted diagnostic tests:
+
+\subsubsection{Heteroscedasticity Test / 異質變異數檢定}
+
+\textbf{Breusch-Pagan Test:}
+\begin{itemize}
+    \item Lagrange Multiplier (LM) statistic: 88.64
+    \item p-value: $< .0001$
+    \item \textbf{Conclusion:} Significant heteroscedasticity detected. We use robust standard errors (HC1) to correct for this.
+\end{itemize}
+
+\subsubsection{Normality Test / 常態性檢定}
+
+\textbf{Shapiro-Wilk Test on Residuals:}
+\begin{itemize}
+    \item W statistic: 0.9741
+    \item p-value: $< .0001$
+    \item \textbf{Conclusion:} Residuals deviate from perfect normality. However, with N=766, OLS relies on asymptotic normality, making this acceptable.
+\end{itemize}
+
+\subsubsection{Multicollinearity Check / 多元共線性檢查}
+
+All Variance Inflation Factors (VIFs) are below 2.0, indicating no multicollinearity concerns:
+
+\begin{table}[H]
+\centering
+\caption{Variance Inflation Factors (VIF)}
+\small
+\begin{tabular}{lr}
+\toprule
+Variable & VIF \\
+\midrule
+Text Length & 1.080 \\
+Question Mark & 1.110 \\
+Emotional Valence & 1.172 \\
+Hashtag Count & 1.323 \\
+Emoji Count & 1.298 \\
+Picture Count & 1.705 \\
+URL Count & 1.430 \\
+At-Mention Count & 1.286 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Main Regression Results / 主要迴歸結果}
+
+Table \ref{tab:regression_main} presents the robust OLS regression results with HC1 standard errors.
+
+\begin{table}[H]
+\centering
+\caption{Robust OLS Regression Results Predicting $\log(1+\text{Engagement})$}
+\label{tab:regression_main}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variable & Coefficient & Robust SE & t-value & p-value \\
+\midrule
+\multicolumn{5}{l}{\textit{Main Independent Variables (Hypotheses)}} \\
+Text Length (H1) & $-0.0211^{***}$ & 0.0033 & $-6.38$ & $<.0001$ \\
+Question Mark (H2) & $0.4793^{***}$ & 0.1391 & 3.45 & 0.0006 \\
+Emotional Valence (H3) & $0.0840^{**}$ & 0.0301 & 2.79 & 0.0052 \\
+Hashtag Count (H4) & $1.0959^{***}$ & 0.1339 & 8.18 & $<.0001$ \\
+Emoji Count (H5) & $0.3428^{***}$ & 0.0932 & 3.68 & 0.0002 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Control Variables}} \\
+Picture Count & $0.7859^{***}$ & 0.1820 & 4.32 & $<.0001$ \\
+URL Count & $0.1694^{*}$ & 0.0804 & 2.11 & 0.0351 \\
+At-Mention Count & $0.5145^{*}$ & 0.2238 & 2.30 & 0.0215 \\
+\addlinespace
+Intercept & $1.5456^{***}$ & 0.1060 & 14.58 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Model Fit Statistics}} \\
+Observations & \multicolumn{4}{l}{766} \\
+$R^2$ & \multicolumn{4}{l}{0.4924} \\
+Adjusted $R^2$ & \multicolumn{4}{l}{0.4871} \\
+F-statistic & \multicolumn{4}{l}{$F(8, 757) = 63.857, p < .0001$} \\
+\bottomrule
+\multicolumn{5}{l}{\small Notes: $^{***} p<.001$, $^{**} p<.01$, $^* p<.05$ (two-tailed).} \\
+\multicolumn{5}{l}{\small Robust standard errors (HC1) used to correct for heteroscedasticity.} \\
+\end{tabular}
+\end{table}
+
+\subsection{Hypothesis Testing Results / 假設檢定結果}
+
+\begin{table}[H]
+\centering
+\caption{Summary of Hypothesis Test Results}
+\small
+\begin{tabular}{llcl}
+\toprule
+Hypothesis & Predicted Direction & Result & Decision \\
+\midrule
+H1: Text Length & Positive (+) & Negative ($-0.021^{***}$) & \textbf{REJECTED} \\
+H2: Question Mark & Positive (+) & Positive ($0.479^{***}$) & \textbf{SUPPORTED} \\
+H3: Emotional Valence & Positive (+) & Positive ($0.084^{**}$) & \textbf{SUPPORTED} \\
+H4: Hashtag Count & Positive (+) & Positive ($1.096^{***}$) & \textbf{SUPPORTED} \\
+H5: Emoji Count & Positive (+) & Positive ($0.343^{***}$) & \textbf{SUPPORTED} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretation of Coefficients / 係數解釋}
+
+\subsubsection{Text Length (H1) - REJECTED}
+\begin{itemize}
+    \item \textbf{Coefficient:} $\beta_1 = -0.021$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional word in a post is associated with a 2.1\% decrease in log-transformed engagement, holding other factors constant.
+    \item \textbf{Implication:} Contrary to expectations, longer posts generate LOWER engagement. This suggests that on a micro-blogging platform like X, brevity is valued over detailed information.
+\end{itemize}
+
+\subsubsection{Question Mark (H2) - SUPPORTED}
+\begin{itemize}
+    \item \textbf{Coefficient:} $\beta_2 = 0.479$ ($p < .001$)
+    \item \textbf{Interpretation:} Posts containing a question mark have approximately 61.5\% higher engagement ($e^{0.479} - 1 \approx 0.615$) compared to posts without questions.
+    \item \textbf{Implication:} Interactive cues like questions significantly boost user participation.
+\end{itemize}
+
+\subsubsection{Emotional Valence (H3) - SUPPORTED}
+\begin{itemize}
+    \item \textbf{Coefficient:} $\beta_3 = 0.084$ ($p = .0052$)
+    \item \textbf{Interpretation:} A one-unit increase in emotional valence score is associated with an 8.8\% increase in engagement ($e^{0.084} - 1 \approx 0.088$).
+    \item \textbf{Implication:} More positive emotional tone resonates with audiences in the travel context.
+\end{itemize}
+
+\subsubsection{Hashtag Count (H4) - SUPPORTED}
+\begin{itemize}
+    \item \textbf{Coefficient:} $\beta_4 = 1.096$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional hashtag is associated with approximately 199\% higher engagement ($e^{1.096} - 1 \approx 1.99$).
+    \item \textbf{Implication:} Hashtags dramatically improve post discoverability and engagement.
+\end{itemize}
+
+\subsubsection{Emoji Count (H5) - SUPPORTED}
+\begin{itemize}
+    \item \textbf{Coefficient:} $\beta_5 = 0.343$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional emoji is associated with approximately 41\% higher engagement ($e^{0.343} - 1 \approx 0.41$).
+    \item \textbf{Implication:} Visual-linguistic cues enhance post expressiveness and attract user attention.
+\end{itemize}
+
+\newpage
+
+\section{Visual Diagnostics / 視覺化診斷}
+
+\subsection{Residual Analysis / 殘差分析}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/residual_histogram.png}
+\caption{Distribution of Residuals with Normal Curve Overlay}
+\label{fig:residual_hist}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{plots/qq_plot.png}
+\caption{Q-Q Plot of Residuals}
+\label{fig:qq_plot}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/resid_vs_fitted.png}
+\caption{Residuals vs Fitted Values (Checking for Heteroscedasticity)}
+\label{fig:resid_fitted}
+\end{figure}
+
+\subsection{Distribution by Question Mark / 依問號分組之分布}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{plots/dist_by_question.png}
+\caption{Distribution of Engagement by Question Mark Group}
+\label{fig:dist_question}
+\end{figure}
+
+\newpage
+
+\section{Model Verification Against Proposal / 模型與提案之驗證}
+
+\subsection{Verification Checklist / 驗證清單}
+
+\begin{table}[H]
+\centering
+\caption{Model Specification Verification}
+\small
+\begin{tabular}{p{0.5\textwidth}p{0.15\textwidth}p{0.25\textwidth}}
+\toprule
+Element & Status & Notes \\
+\midrule
+\textbf{Dependent Variable} & & \\
+$\log(1 + \text{Engagement})$ & \checkmark Verified & Correctly specified \\
+\midrule
+\textbf{Independent Variables (H1-H5)} & & \\
+Text Length (H1) & \checkmark Verified & Mean = 23.45, SD = 12.26 \\
+Question Mark (H2) & \checkmark Verified & Binary: 16.7\% = 1 \\
+Emotional Valence (H3) & \checkmark Verified & Mean = 0.789, SD = 1.528 \\
+Hashtag Count (H4) & \checkmark Verified & Mean = 0.145, SD = 0.489 \\
+Emoji Count (H5) & \checkmark Verified & Mean = 0.398, SD = 0.884 \\
+\midrule
+\textbf{Control Variables} & & \\
+Picture Count & \checkmark Verified & Mean = 0.309 \\
+URL Count & \checkmark Verified & Mean = 0.919 \\
+At-Mention Count & \checkmark Verified & Mean = 0.097 \\
+\midrule
+\textbf{Sample Size} & & \\
+N = 766 observations & \checkmark Verified & No missing data \\
+\midrule
+\textbf{Statistical Method} & & \\
+OLS Regression & \checkmark Verified & Correctly implemented \\
+Robust SE (HC1) & \checkmark Verified & Corrects heteroscedasticity \\
+\midrule
+\textbf{Model Fit} & & \\
+$R^2 = 0.4924$ & \checkmark Verified & 49.2\% variance explained \\
+All VIFs $< 2.0$ & \checkmark Verified & No multicollinearity \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Comparison with Proposal Results / 與提案結果之比較}
+
+The results match the proposal's expected patterns:
+
+\begin{itemize}
+    \item \textbf{Model $R^2$:} Our result (0.4924) matches the proposal statement of "49.2\% variance explained"
+    \item \textbf{Hypothesis Testing:} All five hypotheses tested as specified; H1 rejected, H2-H5 supported
+    \item \textbf{Coefficient Signs:} All coefficients except text length are positive, as theoretically predicted
+    \item \textbf{Statistical Significance:} All focal predictors show statistical significance at $p < .01$ or better
+    \item \textbf{Control Variables:} Picture, URL, and At-Mention all show expected positive effects
+\end{itemize}
+
+\newpage
+
+\section{Managerial Implications / 管理意涵}
+
+\subsection{Key Recommendations for Booking.com / 給 Booking.com 的關鍵建議}
+
+Based on the robust empirical findings, we provide the following actionable recommendations for Booking.com's social media strategy on X:
+
+\subsubsection{1. Embrace Brevity / 擁抱簡潔}
+\begin{itemize}
+    \item \textbf{Finding:} Text length negatively impacts engagement ($\beta = -0.021, p < .001$)
+    \item \textbf{Recommendation:} Keep posts concise (under 20-25 words when possible). Audiences on X value quick, digestible content.
+    \item \textbf{Action:} Audit current posting strategy and establish word count guidelines for social media copywriters.
+\end{itemize}
+
+\subsubsection{2. Use Questions Strategically / 策略性使用提問}
+\begin{itemize}
+    \item \textbf{Finding:} Question marks boost engagement by 61.5\% ($\beta = 0.479, p < .001$)
+    \item \textbf{Recommendation:} Incorporate questions in posts to encourage user interaction and dialogue.
+    \item \textbf{Example:} "Where's your dream destination for 2024? 🌍" instead of "Book your dream destination for 2024."
+\end{itemize}
+
+\subsubsection{3. Maintain Positive Emotional Tone / 維持正向情緒語調}
+\begin{itemize}
+    \item \textbf{Finding:} Positive valence increases engagement by 8.8\% per unit ($\beta = 0.084, p = .0052$)
+    \item \textbf{Recommendation:} Use aspirational, exciting, and positive language that aligns with travel emotions.
+    \item \textbf{Action:} Review sentiment scores of top-performing posts and establish positive language guidelines.
+\end{itemize}
+
+\subsubsection{4. Maximize Hashtag Usage / 最大化 Hashtag 使用}
+\begin{itemize}
+    \item \textbf{Finding:} Each hashtag nearly triples engagement ($\beta = 1.096, p < .001$)
+    \item \textbf{Recommendation:} Include 1-2 relevant hashtags per post to enhance discoverability.
+    \item \textbf{Strategy:} Use trending travel hashtags (e.g., \#TravelTuesday, \#Wanderlust) and destination-specific tags.
+\end{itemize}
+
+\subsubsection{5. Leverage Emoji Strategically / 策略性運用 Emoji}
+\begin{itemize}
+    \item \textbf{Finding:} Each emoji increases engagement by 41\% ($\beta = 0.343, p < .001$)
+    \item \textbf{Recommendation:} Use 1-2 contextually relevant emojis to add visual appeal and expressiveness.
+    \item \textbf{Best Practice:} Emojis should complement the message (e.g., 🏖️ for beach destinations, ✈️ for travel deals).
+\end{itemize}
+
+\subsection{Strategic Content Formula / 策略性內容公式}
+
+Based on the regression model, an optimal Booking.com post on X should:
+
+\begin{enumerate}
+    \item Be \textbf{concise} (15-20 words)
+    \item Include a \textbf{question} to invite participation
+    \item Use \textbf{positive, aspirational language}
+    \item Contain \textbf{1-2 relevant hashtags}
+    \item Include \textbf{1-2 contextual emojis}
+    \item Feature an \textbf{image} when possible (picture count also positively significant)
+\end{enumerate}
+
+\textbf{Example Optimized Post:}
+\begin{quote}
+\textit{"Ready for sun-soaked adventures? 🌴☀️ Discover hidden gems this summer! \#TravelGoals \#BookingDotCom"}
+\end{quote}
+
+\newpage
+
+\section{Limitations and Future Research / 限制與未來研究}
+
+\subsection{Study Limitations / 研究限制}
+
+\begin{enumerate}
+    \item \textbf{Cross-Sectional Design:} Our data captures posts over one year but does not establish causal relationships. Experimental designs could strengthen causal claims.
+
+    \item \textbf{Platform-Specific:} Results are specific to X (Twitter). Engagement patterns may differ on other platforms (e.g., Instagram, Facebook).
+
+    \item \textbf{Single Brand:} The study focuses exclusively on Booking.com. Generalizability to other travel brands or industries requires validation.
+
+    \item \textbf{Engagement Aggregation:} The dependent variable combines likes, comments, and shares equally, but these may represent different levels of user commitment.
+
+    \item \textbf{Time Period:} Data from November 2021 to November 2022 may not reflect current social media trends in 2026.
+\end{enumerate}
+
+\subsection{Future Research Directions / 未來研究方向}
+
+\begin{enumerate}
+    \item \textbf{Disaggregated Engagement:} Examine likes, comments, and shares as separate dependent variables to understand differential effects.
+
+    \item \textbf{Temporal Dynamics:} Investigate how posting time, day of week, and seasonal factors moderate the effects of textual features.
+
+    \item \textbf{Content Interactions:} Test interaction effects between textual features (e.g., does emotional valence moderate the question mark effect?).
+
+    \item \textbf{Image Content Analysis:} Use computer vision to analyze image content and its interaction with textual features.
+
+    \item \textbf{Competitive Benchmarking:} Compare Booking.com's engagement patterns with competitors (Expedia, Airbnb, etc.).
+
+    \item \textbf{Longitudinal Studies:} Track changes in engagement drivers over multiple years to identify trend shifts.
+\end{enumerate}
+
+\newpage
+
+\section{Conclusion / 結論}
+
+This comprehensive statistical analysis validates the research model proposed in the original study and provides robust evidence for the effects of textual features on social media engagement for Booking.com's X account.
+
+\subsection{Key Findings / 關鍵發現}
+
+\begin{enumerate}
+    \item \textbf{Brevity Wins:} Contrary to initial expectations (H1 rejected), shorter posts significantly outperform longer ones on X, reflecting the platform's fast-paced, concise communication culture.
+
+    \item \textbf{Interactivity Drives Engagement:} Question marks (H2 supported) act as powerful engagement catalysts, increasing user participation by over 60\%.
+
+    \item \textbf{Positivity Resonates:} Emotional valence (H3 supported) confirms that aspirational, positive messaging aligns with travel content expectations.
+
+    \item \textbf{Discoverability Matters:} Hashtags (H4 supported) dramatically enhance post reach and engagement, emphasizing the importance of strategic tagging.
+
+    \item \textbf{Visual-Linguistic Cues Work:} Emojis (H5 supported) add expressiveness and visual appeal, significantly boosting user interaction.
+\end{enumerate}
+
+\subsection{Model Quality / 模型品質}
+
+\begin{itemize}
+    \item \textbf{Explanatory Power:} The model explains 49.2\% of variance in engagement ($R^2 = 0.4924$), representing strong predictive performance for social media data.
+
+    \item \textbf{No Multicollinearity:} All VIFs below 2.0 confirm model stability.
+
+    \item \textbf{Robust Inference:} HC1 standard errors account for heteroscedasticity, ensuring valid statistical inference.
+\end{itemize}
+
+\subsection{Practical Value / 實務價值}
+
+This analysis delivers actionable insights for Booking.com's social media team:
+\begin{itemize}
+    \item Clear evidence-based guidelines for content creation
+    \item Quantified effects of specific textual features on engagement
+    \item Strategic recommendations grounded in robust statistical analysis
+\end{itemize}
+
+The findings challenge conventional wisdom about text length while confirming the value of interactive, positive, discoverable, and visually enhanced content on social media platforms.
+
+\subsection{Final Verification Statement / 最終驗證聲明}
+
+\textbf{All results have been verified against the original proposal:}
+\begin{itemize}
+    \item [\checkmark] Model specification matches proposal
+    \item [\checkmark] Variable definitions align with proposal
+    \item [\checkmark] Sample size (N=766) confirmed
+    \item [\checkmark] Statistical methods correctly implemented
+    \item [\checkmark] Results consistent with theoretical framework
+    \item [\checkmark] All hypotheses properly tested
+    \item [\checkmark] Diagnostic checks completed (heteroscedasticity, normality, multicollinearity)
+\end{itemize}
+
+\newpage
+
+\appendix
+\section{Technical Appendix / 技術附錄}
+
+\subsection{Software and Packages / 軟體與套件}
+
+All analyses were conducted using:
+\begin{itemize}
+    \item \textbf{Python 3.x}
+    \item \textbf{pandas} (data manipulation)
+    \item \textbf{numpy} (numerical computing)
+    \item \textbf{scipy} (statistical tests)
+    \item \textbf{statsmodels} (regression analysis, robust standard errors)
+    \item \textbf{matplotlib} (data visualization)
+\end{itemize}
+
+\subsection{Analysis Script / 分析腳本}
+
+The complete analysis was executed using:
+\begin{verbatim}
+analysis/python/run_statistics.py (v2.0.0)
+\end{verbatim}
+
+This script generates:
+\begin{itemize}
+    \item Descriptive statistics (\texttt{stats\_analysis.csv})
+    \item Correlation matrices (\texttt{correlation\_matrix.csv}, \texttt{correlation\_significance.csv})
+    \item Regression results (\texttt{regression\_results.txt})
+    \item Diagnostic plots (\texttt{plots/*.png})
+    \item Full HTML report (\texttt{report.html})
+\end{itemize}
+
+\subsection{Data Files / 資料檔案}
+
+\begin{itemize}
+    \item \textbf{Input:} \texttt{data/research\_data.csv} (766 rows × 38 columns)
+    \item \textbf{Outputs:} All files located in \texttt{results/20260330\_151218/}
+\end{itemize}
+
+\subsection{Reproducibility / 可重現性}
+
+To reproduce these results:
+\begin{enumerate}
+    \item Ensure all Python packages are installed
+    \item Run: \texttt{python analysis/python/run\_statistics.py}
+    \item All outputs will be generated in \texttt{analysis/python/output/}
+\end{enumerate}
+
+\section{References / 參考文獻}
+
+\begin{enumerate}
+    \item De Vries, L., Gensler, S., \& Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
+
+    \item Gkikas, D.C., Tzafilkou, K., Theodoridis, P.K., Garmpis, A., \& Gkikas, M.C. (2022). How do text characteristics impact user engagement in social media posts? Modeling content readability, length, and hashtags number in Facebook. \textit{International Journal of Information Management Data Insights}, 2, 100067.
+
+    \item Ko, E.E., Kim, D., \& Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
+
+    \item Li, Y., \& Xie, Y. (2020). Is a picture worth a thousand words? An empirical study of image content and social media engagement. \textit{Journal of Marketing Research}, 57(1), 1--19.
+
+    \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M., \& Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
+
+    \item Moran, G., Muzellec, L., \& Johnson, D. (2019). Message content features and social media engagement: evidence from the media industry. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
+
+    \item Reddy, M.A.S., \& Prakash, C. (2024). Sentiment Analysis of Social Media Networking Sites: A Comparative Study on User Engagement and Public Opinion.
+
+    \item van der Harst, J.P., \& Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
+\end{enumerate}
+
+\end{document}
