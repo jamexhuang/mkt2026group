@@ -36,5 +36,6 @@ __pycache__/
 
 # 不追蹤 citation check 報告（可視需要調整，若需要共享則移除此行）
 # citation_check_report.md
-
-/Users/jamexhuang/Documents/github/mkt2026group/.tmp
+.tmp
+.tmp/
+.tmp/*
