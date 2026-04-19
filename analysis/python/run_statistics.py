@@ -1,6 +1,6 @@
 """
 run_statistics.py  —  Booking.com Social Media Engagement Study
-Comprehensive Statistical Analysis Script  v2.0.0  (2026-03-28)
+Comprehensive Statistical Analysis Script  v3.0.0  (2026-04-19)
 
 Generates a full HTML report with:
   - Data Preview
@@ -55,11 +55,17 @@ import base64
 # ─── Setup ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "..", "..", "data", "research_data.csv")
-OUT_DIR   = os.path.join(BASE_DIR, "output")
+_ts = datetime.now().strftime("20260419_%H%M%S")
+RESULTS_DIR = os.path.join(BASE_DIR, "..", "..", "results", _ts)
+OUT_DIR   = os.path.join(RESULTS_DIR, "python")
 PLOT_DIR = os.path.join(OUT_DIR, "plots")
+PLOTS_ROOT_DIR = os.path.join(RESULTS_DIR, "plots")
+DATA_OUT_DIR = os.path.join(RESULTS_DIR, "data")
 SAS_IN_DIR = os.path.join(BASE_DIR, "..", "sas", "input")
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(PLOT_DIR, exist_ok=True)
+os.makedirs(PLOTS_ROOT_DIR, exist_ok=True)
+os.makedirs(DATA_OUT_DIR, exist_ok=True)
 os.makedirs(SAS_IN_DIR, exist_ok=True)
 
 # Try to use a CJK-compatible font for matplotlib
@@ -208,11 +214,41 @@ Python Statistical Analysis — Comprehensive Report
 #  1. Load Data
 # ═══════════════════════════════════════════════════════════════════════════════
 print("=" * 70)
-print("Booking.com Engagement Study — Statistical Analysis v2.0.0")
+print("Booking.com Engagement Study — Statistical Analysis v3.0.0")
 print("=" * 70)
 
 df_raw = pd.read_csv(DATA_PATH, encoding="utf-8-sig", low_memory=False)
 print(f"\n[INFO] Raw data loaded: {df_raw.shape[0]} rows × {df_raw.shape[1]} cols")
+print(f"[INFO] Results directory: {RESULTS_DIR}")
+
+# ── Language filter (v3): keep English-only tweets ──────────────────────
+from langdetect import detect, LangDetectException
+import re as _re
+
+def _detect_lang(text):
+    cleaned = _re.sub(r'https?://\S+|@\w+|#\w+', '', str(text)).strip()
+    if len(cleaned) < 10:
+        return 'en'
+    try:
+        return detect(cleaned)
+    except LangDetectException:
+        return 'en'
+
+lang_mask = df_raw['tweet_content'].apply(_detect_lang) == 'en'
+n_dropped = (~lang_mask).sum()
+df_raw = df_raw[lang_mask].reset_index(drop=True)
+print(f"[INFO] Language filter: dropped {n_dropped} non-English tweets. Remaining: {len(df_raw)}")
+
+# Drop rows with zero text length (no usable English content)
+n_before_len = len(df_raw)
+df_raw = df_raw[df_raw['length'] > 0].reset_index(drop=True)
+print(f"[INFO] After dropping length==0: {len(df_raw)} rows (dropped {n_before_len - len(df_raw)})")
+
+# Save English-only filtered dataset
+df_raw.to_csv(os.path.join(DATA_OUT_DIR, "research_data_en_only.csv"),
+              index=False, encoding="utf-8-sig")
+print(f"[Saved] data/research_data_en_only.csv  (N={len(df_raw)})")
+# ────────────────────────────────────────────────────────────────────────
 
 rpt = HtmlReport("Booking.com Social Media Engagement — Statistical Report")
 
@@ -975,7 +1011,7 @@ rpt.img(fig8, f"Distribution of {LABEL['engagement']} (highly right-skewed)")
 # ═══════════════════════════════════════════════════════════════════════════════
 reg_lines = []
 reg_lines.append("=" * 70)
-reg_lines.append("REGRESSION RESULTS  —  Booking.com Engagement Study  v2.0.0")
+reg_lines.append("REGRESSION RESULTS  —  Booking.com Engagement Study  v3.0.0")
 reg_lines.append(f"DV: {LABEL[DV]}")
 reg_lines.append("Model: IV (H1–H5) + CV  |  Robust Standard Errors (HC1)")
 reg_lines.append("=" * 70)
@@ -1058,6 +1094,13 @@ sas_path = os.path.join(SAS_IN_DIR, "sas_ready.csv")
 sas_df.to_csv(sas_path, index=False, encoding="utf-8-sig")
 print(f"[Saved] sas_ready.csv  ({sas_df.shape[0]} rows × {sas_df.shape[1]} cols)")
 
+# ── Copy plots to root results/plots/ dir ────────────────────────────────────
+import shutil as _shutil
+for _f in os.listdir(PLOT_DIR):
+    if _f.endswith('.png'):
+        _shutil.copy2(os.path.join(PLOT_DIR, _f), os.path.join(PLOTS_ROOT_DIR, _f))
+print(f"[INFO] Plots copied to {PLOTS_ROOT_DIR}")
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  16. Write HTML Report
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1071,14 +1114,16 @@ print(f"\n[Saved] report.html")
 #  Summary
 # ═══════════════════════════════════════════════════════════════════════════════
 print("\n" + "=" * 70)
-print("  Output files saved to: analysis/python/output/")
-print("  ─ report.html                  (full HTML report)")
-print("  ─ stats_analysis.csv           (descriptive statistics)")
-print("  ─ correlation_matrix.csv       (Pearson r matrix)")
-print("  ─ correlation_significance.csv (r with significance stars)")
-print("  ─ regression_results.txt       (OLS + HC1 robust SE)")
+print(f"  Output files saved to: {RESULTS_DIR}")
+print("  ─ python/report.html                  (full HTML report)")
+print("  ─ python/stats_analysis.csv           (descriptive statistics)")
+print("  ─ python/correlation_matrix.csv       (Pearson r matrix)")
+print("  ─ python/correlation_significance.csv (r with significance stars)")
+print("  ─ python/regression_results.txt       (OLS + HC1 robust SE)")
+print("  ─ python/plots/*.png                  (diagnostic plots)")
+print("  ─ plots/*.png                         (root-level plot copies)")
+print("  ─ data/research_data_en_only.csv      (English-only filtered dataset)")
 print("  SAS input saved to: analysis/sas/input/")
 print("  ─ sas_ready.csv               (all columns, research vars first)")
-print("  ─ plots/*.png                  (diagnostic plots)")
 print("=" * 70)
-print("\nDone. Script: run_statistics.py  v2.0.0")
+print("\nDone. Script: run_statistics.py  v3.0.0")
