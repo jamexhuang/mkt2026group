@@ -3,6 +3,8 @@
 
 This directory contains the complete statistical analysis results for the Booking.com social media engagement study, including Python computation process and outputs.
 
+> ⚠️ **Version note:** These results were produced by `analysis/python/run_statistics.py` **v2.0.0** (timestamp in folder name). The script has since been upgraded to **v3.0.0** (2026-04-19), which adds a `langdetect` English-only filter and a `length > 0` filter. Rerunning the current v3.0.0 script against the same input will yield a **smaller analysis sample** (N < 766) and therefore slightly different numbers. To reproduce this specific results folder exactly, check out the v2.0.0 script.
+
 ## Directory Structure
 
 ```
@@ -99,9 +101,13 @@ The main PDF report (22 pages) includes:
 ## Python Analysis Details
 
 All analyses were conducted using:
-- **Script:** `analysis/python/run_statistics.py` (v2.0.0)
+- **Script:** `analysis/python/run_statistics.py` (v2.0.0 — see Version note above)
 - **Python packages:** pandas, numpy, scipy, statsmodels, matplotlib
-- **Statistical method:** Robust OLS regression with HC1 standard errors
+- **Dependent-variable transformation:** `log_engagement = np.log1p(like + comment + share)` — natural logarithm, base $e$; the $+1$ offset handles zero-engagement posts. Throughout the report, "log" refers to $\ln$.
+- **Question-mark transformation:** raw `question` column is a count; the script dichotomises to 0/1 via `(df["question"] > 0).astype(int)` before regression.
+- **Text preprocessing:** `length` is the whitespace-split token count of `text_clean6` (final stage of a six-stage cleaning pipeline that strips URLs, @mentions, hashtags, punctuation, digits, stop-words, and lower-cases). The intermediate `text_clean1`–`text_clean5` columns are retained in the dataset but are not modelled.
+- **Valence construction:** `valence` is **not** computed by `run_statistics.py` — it is a pre-existing column in the input CSV, equal to `mean(matched_valence_scores) − 4.5`, where scores come from a Warriner-style 1–9 valence lexicon. Centred so 0 ≈ neutral; range in this dataset: [−3.35, 3.95].
+- **Statistical method:** OLS regression with HC1 heteroscedasticity-consistent standard errors (numerically equivalent, up to finite-sample scaling, to SAS `SURVEYREG VARMETHOD=TAYLOR` when no strata/clusters are specified).
 - **Diagnostic tests:** Breusch-Pagan, Shapiro-Wilk, VIF analysis
 
 ### Output Files

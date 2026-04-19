@@ -7,16 +7,18 @@
 ## 1. Model Specification Verification ✅
 
 ### Dependent Variable
-- **Proposal:** $\log(1 + \text{Engagement})$ where Engagement = like + comment + share
-- **Results:** ✅ **VERIFIED** - Correctly implemented
-- **Evidence:** Python script line 223-224 creates `engagement` and `log_engagement` variables
+- **Proposal:** $\ln(1 + \text{Engagement})$ where Engagement = like + comment + share (natural log; the $+1$ offset avoids $\ln(0)$ for zero-engagement posts)
+- **Results:** ✅ **VERIFIED** - Correctly implemented as `np.log1p(engagement)` (natural logarithm, base $e$)
+- **Evidence:** Python script (`run_statistics.py` v2.0.0) creates `engagement = like + comment + share` and `log_engagement = np.log1p(engagement)`
 
 ### Model Equation
 **Proposal:**
 ```
-log(1 + Engagement) = β₀ + β₁·TextLength + β₂·Question + β₃·Valence
-                      + β₄·Hashtag + β₅·Emoji + β₆·Picture + β₇·URL
-                      + β₈·AtMention + ε
+ln(1 + Engagement) = β₀ + β₁·TextLength + β₂·Question + β₃·Valence
+                     + β₄·Hashtag + β₅·Emoji + β₆·Picture + β₇·URL
+                     + β₈·AtMention + ε
+
+(ln ≡ natural logarithm, base e; implemented via numpy.log1p)
 ```
 
 **Results:** ✅ **VERIFIED** - Exact match
@@ -186,11 +188,11 @@ Sample correlations from proposal vs results:
 
 | Correlation Pair | Proposal r | Results r | Match? |
 |------------------|-----------|-----------|--------|
-| log(Eng) ↔ Text Length | -0.184*** | -0.184*** | ✅ EXACT |
-| log(Eng) ↔ Question | 0.262*** | 0.262*** | ✅ EXACT |
-| log(Eng) ↔ Valence | 0.234*** | 0.234*** | ✅ EXACT |
-| log(Eng) ↔ Hashtag | 0.452*** | 0.452*** | ✅ EXACT |
-| log(Eng) ↔ Emoji | 0.411*** | 0.411*** | ✅ EXACT |
+| ln(Eng) ↔ Text Length | -0.184*** | -0.184*** | ✅ EXACT |
+| ln(Eng) ↔ Question | 0.262*** | 0.262*** | ✅ EXACT |
+| ln(Eng) ↔ Valence | 0.234*** | 0.234*** | ✅ EXACT |
+| ln(Eng) ↔ Hashtag | 0.452*** | 0.452*** | ✅ EXACT |
+| ln(Eng) ↔ Emoji | 0.411*** | 0.411*** | ✅ EXACT |
 | Question ↔ Text Length | -0.191*** | -0.191*** | ✅ EXACT |
 
 **Conclusion:** Correlation matrix matches proposal exactly.
@@ -203,7 +205,7 @@ Comparison of key descriptive statistics:
 
 | Variable | Proposal Mean | Results Mean | Proposal SD | Results SD | Match? |
 |----------|--------------|--------------|-------------|------------|--------|
-| log(1+Engagement) | 1.94 | 1.942 | 1.57 | 1.572 | ✅ MATCH |
+| ln(1+Engagement) | 1.94 | 1.942 | 1.57 | 1.572 | ✅ MATCH |
 | Text Length | 23.45 | 23.45 | 12.26 | 12.26 | ✅ EXACT |
 | Question Mark | 0.17 | 0.167 | 0.37 | 0.373 | ✅ MATCH |
 | Emot. Valence | 0.79 | 0.789 | 1.53 | 1.528 | ✅ MATCH |

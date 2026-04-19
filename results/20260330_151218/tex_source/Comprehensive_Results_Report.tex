@@ -77,7 +77,7 @@ The empirical model examines how five focal textual features relate to social me
 
 \begin{equation}
 \begin{aligned}
-\log(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+\ln(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
 & + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{Picture}_i + \beta_7\text{URL}_i \\
 & + \beta_8\text{AtMention}_i + \varepsilon_i
 \end{aligned}
@@ -86,10 +86,12 @@ The empirical model examines how five focal textual features relate to social me
 where:
 \begin{itemize}
     \item $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$
-    \item The dependent variable is log-transformed as $\log(1 + \text{Engagement}_i)$ to address right-skewness
+    \item The dependent variable is natural-log-transformed as $\ln(1 + \text{Engagement}_i)$ (computed via \texttt{numpy.log1p}) to address right-skewness. Throughout this report, ``log'' refers to the natural logarithm ($\ln$, base $e$); the $+1$ offset avoids $\ln(0)$ for posts with zero engagement.
     \item Independent variables: TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
     \item Control variables: Picture, URL, AtMention
 \end{itemize}
+
+\paragraph{Coefficient interpretation convention.} Because the dependent variable is $\ln(1+\text{Engagement})$, a one-unit change in $X_k$ produces an \emph{approximately} $(e^{\beta_k}-1)\times 100\%$ change in $(1+\text{Engagement})$, holding other variables constant. For small $|\beta_k|$ this collapses to the familiar $\beta_k \times 100\%$ semi-elasticity. Because of the $+1$ offset, these percentage changes apply strictly to $(1+\text{Engagement})$ rather than to $\text{Engagement}$; for posts with non-trivial engagement ($\text{Engagement} \gtrsim 10$) the two are numerically close. All hypothesis tests below report this $(e^{\beta}-1)$ form for consistency.
 
 \section{Data Description / 資料說明}
 
@@ -108,17 +110,17 @@ where:
 \centering
 \caption{Variable Definitions and Operationalization}
 \small
-\begin{tabular}{@{}p{0.20\textwidth} p{0.18\textwidth} p{0.42\textwidth}@{}}
+\begin{tabular}{@{}p{0.20\textwidth} p{0.16\textwidth} p{0.56\textwidth}@{}}
 \toprule
 Construct & Role & Operational Definition \\
 \midrule
-Social Media Engagement & Dependent Variable & Sum of likes, comments, and shares; log-transformed as $\log(1+\text{Engagement})$ \\
+Social Media Engagement & Dependent Variable & $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$, transformed as $\ln(1+\text{Engagement}_i)$ via \texttt{numpy.log1p} to address right-skewness \\
 \midrule
-Text Length & Main IV (H1) & Number of cleaned English words after preprocessing \\
-Question Mark & Main IV (H2) & Binary dummy (1 if post contains '?', else 0) \\
-Emotional Valence & Main IV (H3) & Lexicon-based sentiment score (higher = more positive) \\
-Hashtag Count & Main IV (H4) & Number of hashtags in the post \\
-Emoji Count & Main IV (H5) & Number of emoji characters in the post \\
+Text Length & Main IV (H1) & Number of tokens in the final cleaned text (\texttt{text\_clean6}) after a six-stage pipeline that removes URLs, @mentions, punctuation, digits, English stop-words, and performs lower-casing (see §\ref{sec:preproc}) \\
+Question Mark & Main IV (H2) & Binary dummy: 1 if the raw post contains at least one `?' (i.e., raw question-mark count $>0$), else 0. The original dataset stored a count; it is dichotomised in the analysis script prior to regression \\
+Emotional Valence & Main IV (H3) & Lexicon-based sentiment score. For each post, tokens matched against a 1--9 valence lexicon (Warriner-style ANEW extension) are averaged and centred by subtracting 4.5, so 0 $\approx$ neutral, positive $=$ more pleasant, negative $=$ more unpleasant. Posts with no matched terms receive valence $= 0$ \\
+Hashtag Count & Main IV (H4) & Number of \texttt{\#tag} tokens in the raw post \\
+Emoji Count & Main IV (H5) & Number of emoji code-points in the raw post (full Unicode coverage preserved via \texttt{utf-8-sig} encoding) \\
 \midrule
 Picture Count & Control Variable & Number of pictures attached to the post \\
 URL Count & Control Variable & Number of URLs in the post \\
@@ -126,6 +128,22 @@ At-Mention Count & Control Variable & Number of @mentions in the post \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{Text Preprocessing Pipeline / 文字前處理流程}
+\label{sec:preproc}
+
+The raw tweet text (\texttt{tweet\_content}) is passed through six sequential cleaning stages (columns \texttt{text\_clean1}--\texttt{text\_clean6} in the research dataset) before \texttt{length}, \texttt{valence}, and the n-gram features are computed. The stages are:
+
+\begin{enumerate}
+    \item \texttt{text\_clean1}: Strip URLs (\texttt{https?://\dots}), @mentions, \#hashtags, and other markup artefacts from the raw text while preserving case and emoji.
+    \item \texttt{text\_clean2}: Remove exclamation marks and re-check character set (the \texttt{exclamation} count is extracted in this pass).
+    \item \texttt{text\_clean3}: Lower-case normalisation.
+    \item \texttt{text\_clean4}: Remove residual punctuation and stray digits, keeping only alphabetic tokens and whitespace.
+    \item \texttt{text\_clean5}: Remove English stop-words (standard NLTK/scikit-learn stop-word list).
+    \item \texttt{text\_clean6}: Final cleaned text used for feature extraction; \texttt{length} is computed as the whitespace-split token count of this string.
+\end{enumerate}
+
+Downstream, \texttt{text\_clean6} is tokenised (\texttt{tweet\_tokenized}) and stemmed (\texttt{tweet\_stemmed}, Porter stemmer), then used to build unigram / bigram / trigram features and to match against the valence, extremity, and emotionality lexicons. Only the final \texttt{length} and \texttt{valence} columns enter the regression; the intermediate columns are retained in the dataset for auditability but are not modelled.
 
 \newpage
 
@@ -144,7 +162,7 @@ Table \ref{tab:desc_full} presents comprehensive descriptive statistics for all 
 \toprule
 Variable & Mean & SD & Min & Q1 & Median & Q3 & Max & Skew \\
 \midrule
-log(1+Engagement) & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+$\ln(1+\text{Eng.})$ & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
 Text Length (words) & 23.45 & 12.26 & 0.000 & 14.00 & 22.00 & 33.00 & 53.00 & 0.239 \\
 Question Mark (0/1) & 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
 Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.047 & 3.948 & 0.371 \\
@@ -203,7 +221,7 @@ Table \ref{tab:corr_full} presents the Pearson correlation matrix with significa
 \toprule
  & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
 \midrule
-(1) log(1+Eng.) & 1 & & & & & & & & \\
+(1) $\ln(1+\text{Eng.})$ & 1 & & & & & & & & \\
 (2) Text Length & $-0.184^{***}$ & 1 & & & & & & & \\
 (3) Question Mk. & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
 (4) Emot. Valence & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
@@ -230,7 +248,14 @@ Table \ref{tab:corr_full} presents the Pearson correlation matrix with significa
 
 \section{Regression Analysis / 迴歸分析}
 
+\subsection{Estimation Method / 估計方法}
+
+The model is estimated by Ordinary Least Squares with heteroscedasticity-consistent HC1 (White/MacKinnon--White) standard errors, computed via \texttt{statsmodels.ols(\ldots).fit(cov\_type="HC1")}. HC1 is used throughout for inference after the Breusch--Pagan test flagged significant heteroscedasticity (see \S\ref{sec:diag}). The point estimates themselves are identical to classical OLS; only the standard errors, $t$-values, and $p$-values differ.
+
+Note that the original proposal referenced SAS \texttt{SURVEYREG} with \texttt{VARMETHOD=TAYLOR}. In the absence of strata or clusters, SAS's Taylor linearisation estimator is numerically close to HC1 (it differs from HC0 by the same $n/(n-k)$ finite-sample scaling), so coefficients and HC1 standard errors reported here are directly comparable to the proposal's SAS output. Small SE differences across implementations are expected and do not affect any significance conclusions in this study.
+
 \subsection{Model Diagnostics / 模型診斷}
+\label{sec:diag}
 
 Before presenting the main results, we conducted diagnostic tests:
 
@@ -282,7 +307,7 @@ Table \ref{tab:regression_main} presents the robust OLS regression results with 
 
 \begin{table}[H]
 \centering
-\caption{Robust OLS Regression Results Predicting $\log(1+\text{Engagement})$}
+\caption{Robust OLS Regression Results Predicting $\ln(1+\text{Engagement})$}
 \label{tab:regression_main}
 \small
 \begin{tabular}{lcccc}
@@ -335,38 +360,40 @@ H5: Emoji Count & Positive (+) & Positive ($0.343^{***}$) & \textbf{SUPPORTED} \
 
 \subsection{Interpretation of Coefficients / 係數解釋}
 
+All percentage effects below use $(e^{\beta}-1)\times 100\%$ and describe the change in $(1+\text{Engagement})$ per unit change in the predictor, holding other variables constant.
+
 \subsubsection{Text Length (H1) - REJECTED}
 \begin{itemize}
-    \item \textbf{Coefficient:} $\beta_1 = -0.021$ ($p < .001$)
-    \item \textbf{Interpretation:} Each additional word in a post is associated with a 2.1\% decrease in log-transformed engagement, holding other factors constant.
+    \item \textbf{Coefficient:} $\beta_1 = -0.0211$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional word is associated with a $(e^{-0.0211}-1)\times 100\% \approx -2.09\%$ change in $(1+\text{Engagement})$.
     \item \textbf{Implication:} Contrary to expectations, longer posts generate LOWER engagement. This suggests that on a micro-blogging platform like X, brevity is valued over detailed information.
 \end{itemize}
 
 \subsubsection{Question Mark (H2) - SUPPORTED}
 \begin{itemize}
-    \item \textbf{Coefficient:} $\beta_2 = 0.479$ ($p < .001$)
-    \item \textbf{Interpretation:} Posts containing a question mark have approximately 61.5\% higher engagement ($e^{0.479} - 1 \approx 0.615$) compared to posts without questions.
+    \item \textbf{Coefficient:} $\beta_2 = 0.4793$ ($p < .001$)
+    \item \textbf{Interpretation:} Posts containing at least one question mark show $(e^{0.4793}-1)\times 100\% \approx +61.5\%$ in $(1+\text{Engagement})$ versus posts without.
     \item \textbf{Implication:} Interactive cues like questions significantly boost user participation.
 \end{itemize}
 
 \subsubsection{Emotional Valence (H3) - SUPPORTED}
 \begin{itemize}
-    \item \textbf{Coefficient:} $\beta_3 = 0.084$ ($p = .0052$)
-    \item \textbf{Interpretation:} A one-unit increase in emotional valence score is associated with an 8.8\% increase in engagement ($e^{0.084} - 1 \approx 0.088$).
+    \item \textbf{Coefficient:} $\beta_3 = 0.0840$ ($p = .0052$)
+    \item \textbf{Interpretation:} A one-unit increase in the centred valence score (roughly one point on the 1--9 lexicon scale) is associated with $(e^{0.0840}-1)\times 100\% \approx +8.8\%$ in $(1+\text{Engagement})$.
     \item \textbf{Implication:} More positive emotional tone resonates with audiences in the travel context.
 \end{itemize}
 
 \subsubsection{Hashtag Count (H4) - SUPPORTED}
 \begin{itemize}
-    \item \textbf{Coefficient:} $\beta_4 = 1.096$ ($p < .001$)
-    \item \textbf{Interpretation:} Each additional hashtag is associated with approximately 199\% higher engagement ($e^{1.096} - 1 \approx 1.99$).
+    \item \textbf{Coefficient:} $\beta_4 = 1.0959$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional hashtag is associated with $(e^{1.0959}-1)\times 100\% \approx +199\%$ in $(1+\text{Engagement})$, i.e., roughly a tripling.
     \item \textbf{Implication:} Hashtags dramatically improve post discoverability and engagement.
 \end{itemize}
 
 \subsubsection{Emoji Count (H5) - SUPPORTED}
 \begin{itemize}
-    \item \textbf{Coefficient:} $\beta_5 = 0.343$ ($p < .001$)
-    \item \textbf{Interpretation:} Each additional emoji is associated with approximately 41\% higher engagement ($e^{0.343} - 1 \approx 0.41$).
+    \item \textbf{Coefficient:} $\beta_5 = 0.3428$ ($p < .001$)
+    \item \textbf{Interpretation:} Each additional emoji is associated with $(e^{0.3428}-1)\times 100\% \approx +40.9\%$ in $(1+\text{Engagement})$.
     \item \textbf{Implication:} Visual-linguistic cues enhance post expressiveness and attract user attention.
 \end{itemize}
 
@@ -421,7 +448,7 @@ H5: Emoji Count & Positive (+) & Positive ($0.343^{***}$) & \textbf{SUPPORTED} \
 Element & Status & Notes \\
 \midrule
 \textbf{Dependent Variable} & & \\
-$\log(1 + \text{Engagement})$ & \checkmark Verified & Correctly specified \\
+$\ln(1 + \text{Engagement})$ & \checkmark Verified & Correctly specified (\texttt{np.log1p}) \\
 \midrule
 \textbf{Independent Variables (H1-H5)} & & \\
 Text Length (H1) & \checkmark Verified & Mean = 23.45, SD = 12.26 \\
