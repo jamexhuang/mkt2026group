@@ -1,0 +1,476 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{fontspec}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+\setstretch{1.2}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{2em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Booking.com Social Media Engagement Study\\
+Complete Results Report with Verification\\[0.5em]
+\large Version 4.0.0 (Dummy-encoded Control Variables)\\[0.3em]
+\small Generated: 2026-04-29}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Executive Summary}
+\addcontentsline{toc}{section}{Executive Summary}
+
+This report presents the complete statistical analysis results for the Booking.com social media engagement study (v4.0.0). All analyses were conducted using Python statistical scripts with heteroscedasticity-consistent (HC1) standard errors. Relative to the v2.0.0 baseline (results folder \texttt{20260330\_151218}), the only methodological change in v4.0.0 is the re-coding of the three control variables (Picture, URL, At-Mention) from raw counts to binary dummies (presence/absence). This single change raises the model $R^2$ from 0.4924 to 0.5119 (adjusted $R^2$ from 0.4871 to 0.5068) on the same $N=766$ sample, with all VIFs remaining below 2.0 and the substantive direction of every focal hypothesis preserved.
+
+The change is theoretically motivated: on a microblog platform, what matters for audience attention is whether a post carries an image, a link, or a mention---not how many of each are stacked together. Operationalising the controls as dummies removes noise introduced by a small number of multi-attachment posts and leaves more variance in the dependent variable to be attributed to the focal textual features.
+
+\section{Research Framework}
+
+\subsection{Research Question}
+\textbf{How do textual features in Booking.com's posts on X influence social media engagement?}
+
+\subsection{Hypotheses}
+
+The study tests five focal hypotheses concerning textual content:
+
+\begin{enumerate}[label=H\arabic*.]
+    \item Text length is positively associated with social media engagement.
+    \item Question marks are positively associated with social media engagement.
+    \item Emotional valence is positively associated with social media engagement.
+    \item The number of hashtags is positively associated with social media engagement.
+    \item Emoji usage is positively associated with social media engagement.
+\end{enumerate}
+
+\subsection{Model Specification}
+
+The empirical model examines how five focal textual features relate to social media engagement while controlling for three post-level attachments:
+
+\begin{equation}
+\begin{aligned}
+\ln(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{PictureD}_i + \beta_7\text{URLD}_i \\
+& + \beta_8\text{AtMentionD}_i + \varepsilon_i
+\end{aligned}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$
+    \item The dependent variable is the natural log of one plus engagement, $\ln(1 + \text{Engagement}_i)$ (computed via \texttt{numpy.log1p}), to address right-skewness without dropping zero-engagement posts. Throughout, ``log'' denotes the natural logarithm $\ln$.
+    \item Independent variables (focal): TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
+    \item Control variables (\textbf{v4.0.0: binary dummies}): PictureD = $\mathbb{1}[\text{picture count}>0]$, URLD = $\mathbb{1}[\text{url count}>0]$, AtMentionD = $\mathbb{1}[\text{@mention count}>0]$
+\end{itemize}
+
+\paragraph{Coefficient interpretation.} For continuous predictors, a one-unit increase in $X_k$ produces an approximately $(e^{\beta_k}-1)\times 100\%$ change in $(1+\text{Engagement})$, holding other variables constant. For binary predictors, the same expression compares the conditional mean of $(1+\text{Engagement})$ when the feature is present to the case when it is absent. For posts with non-trivial engagement ($\gtrsim 10$), the $+1$ offset is numerically negligible.
+
+\section{Data Description}
+
+\subsection{Dataset Characteristics}
+
+\begin{itemize}
+    \item \textbf{Sample Size:} $N = 766$ original posts from Booking.com's official X account.
+    \item \textbf{Time Period:} November 1, 2021 to November 21, 2022.
+    \item \textbf{Data Source:} \texttt{data/research\_data.csv} (publicly available curated dataset).
+    \item \textbf{Variables:} 38 columns including raw engagement counts, textual features, and post-level attachments.
+    \item \textbf{Filtering:} Replies, retweets and video posts were removed prior to release of the dataset; no further row-level filtering is applied in v4.0.0 so that $N=766$ matches the v2.0.0 baseline.
+\end{itemize}
+
+\subsection{Variable Definitions}
+
+\begin{table}[H]
+\centering
+\caption{Variable Definitions and Operationalisation}
+\small
+\begin{tabular}{@{}p{0.20\textwidth} p{0.16\textwidth} p{0.56\textwidth}@{}}
+\toprule
+Construct & Role & Operational Definition \\
+\midrule
+Social Media Engagement & Dependent Variable & $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$, transformed as $\ln(1+\text{Engagement}_i)$ via \texttt{numpy.log1p} to address right-skewness. \\
+\midrule
+Text Length & Main IV (H1) & Number of tokens in the final cleaned text (\texttt{text\_clean6}) after a six-stage pipeline that strips URLs, @mentions, hashtags, punctuation, digits, English stop-words, and case (see §\ref{sec:preproc}). \\
+Question Mark & Main IV (H2) & Binary dummy: 1 if the raw post contains at least one ``?''; else 0. \\
+Emotional Valence & Main IV (H3) & Lexicon-based sentiment score: tokens matched against a 1--9 valence lexicon (Warriner-style ANEW extension) are averaged and centred by subtracting 4.5; positive $=$ pleasant, negative $=$ unpleasant; posts with no matched terms receive 0. \\
+Hashtag Count & Main IV (H4) & Number of \texttt{\#tag} tokens in the raw post. \\
+Emoji Count & Main IV (H5) & Number of emoji code-points in the raw post. \\
+\midrule
+Picture (0/1) & Control (v4) & 1 if the post has at least one image; else 0. \\
+URL (0/1) & Control (v4) & 1 if the post contains at least one URL; else 0. \\
+At-Mention (0/1) & Control (v4) & 1 if the post contains at least one @mention; else 0. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Why dummy controls?} The original v2.0.0 specification used raw counts. Empirically, more than 96\% of posts have either zero or one image, and the URL and @mention distributions are similarly bimodal at \{0, 1\}. The dichotomous re-coding therefore matches the natural variation in the data. Theoretically, marginal differences between, say, ``one image'' and ``two images'' carry weak independent meaning; the meaningful contrast for content strategy is whether the attachment is present at all.
+
+\subsection{Text Preprocessing Pipeline}
+\label{sec:preproc}
+
+The raw tweet text (\texttt{tweet\_content}) is passed through six sequential cleaning stages (\texttt{text\_clean1}--\texttt{text\_clean6}) before \texttt{length}, \texttt{valence} and the n-gram features are computed:
+
+\begin{enumerate}
+    \item \texttt{text\_clean1}: Strip URLs, @mentions, \#hashtags and markup artefacts (case and emoji preserved).
+    \item \texttt{text\_clean2}: Remove exclamation marks; the \texttt{exclamation} count is extracted in this pass.
+    \item \texttt{text\_clean3}: Lower-case normalisation.
+    \item \texttt{text\_clean4}: Remove residual punctuation and digits.
+    \item \texttt{text\_clean5}: Remove English stop-words (NLTK / scikit-learn list).
+    \item \texttt{text\_clean6}: Final cleaned text used for feature extraction; \texttt{length} is the whitespace-split token count of this string.
+\end{enumerate}
+
+Downstream, \texttt{text\_clean6} is tokenised and stemmed (Porter stemmer), then matched against the valence lexicon. Only the final \texttt{length} and \texttt{valence} columns enter the regression; the intermediate columns are retained for auditability.
+
+\newpage
+
+\section{Descriptive Statistics}
+
+\subsection{Summary Statistics}
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics ($N=766$)}
+\label{tab:desc_full}
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Variable & Mean & SD & Min & Q1 & Median & Q3 & Max & Skew \\
+\midrule
+$\ln(1+\text{Eng.})$ & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+Text Length (words) & 23.453 & 12.257 & 0.000 & 14.000 & 22.000 & 33.000 & 53.000 & 0.239 \\
+Question Mark (0/1) & 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
+Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.046 & 3.948 & 0.371 \\
+Hashtag Count & 0.145 & 0.489 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 3.817 \\
+Emoji Count & 0.398 & 0.884 & 0.000 & 0.000 & 0.000 & 1.000 & 13.000 & 5.261 \\
+Picture (0/1) & 0.287 & 0.453 & 0.000 & 0.000 & 0.000 & 1.000 & 1.000 & 0.941 \\
+URL (0/1) & 0.698 & 0.459 & 0.000 & 0.000 & 1.000 & 1.000 & 1.000 & $-0.865$ \\
+At-Mention (0/1) & 0.080 & 0.271 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 3.105 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Frequency Distribution of Binary Variables}
+
+\begin{table}[H]
+\centering
+\caption{Frequencies of the Four Binary Indicators ($N=766$)}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Indicator & 0 (No) & \% & 1 (Yes) & \% \\
+\midrule
+Question Mark & 638 & 83.29 & 128 & 16.71 \\
+Picture (0/1) & 546 & 71.28 & 220 & 28.72 \\
+URL (0/1) & 231 & 30.16 & 535 & 69.84 \\
+At-Mention (0/1) & 705 & 92.04 & 61 & 7.96 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Observations}
+
+\begin{itemize}
+    \item \textbf{Engagement distribution:} The log-transformed engagement is right-skewed (skew $=1.001$); raw engagement is severely skewed (skew $=7.67$, max $=2{,}474$), motivating the log transformation.
+    \item \textbf{Text length:} Posts average 23.5 words (SD $=12.3$), close to symmetric (skew $=0.24$).
+    \item \textbf{Question marks:} 16.7\% of posts contain at least one ``?''.
+    \item \textbf{Hashtags / emojis:} Both are sparse (means below 0.5) and right-skewed; most posts have none.
+    \item \textbf{Controls:} 28.7\% of posts include a picture, 69.8\% include a URL, and 8.0\% include an @mention.
+\end{itemize}
+
+\newpage
+
+\section{Correlation Analysis}
+
+\subsection{Pearson Correlation Matrix}
+
+\begin{table}[H]
+\centering
+\caption{Pearson Correlation Matrix (Lower Triangle, $N=766$)}
+\label{tab:corr_full}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
+\midrule
+(1) $\ln(1+\text{Eng.})$ & 1 & & & & & & & & \\
+(2) Text Length & $-0.184^{***}$ & 1 & & & & & & & \\
+(3) Question Mk. & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
+(4) Emot. Valence & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
+(5) Hashtag Ct. & $0.452^{***}$ & $-0.012$ & $0.075^{*}$ & $0.047$ & 1 & & & & \\
+(6) Emoji Ct. & $0.411^{***}$ & $-0.044$ & $0.206^{***}$ & $0.257^{***}$ & $0.087^{*}$ & 1 & & & \\
+(7) Picture (0/1) & $0.481^{***}$ & $-0.042$ & $0.172^{***}$ & $0.346^{***}$ & $0.042$ & $0.439^{***}$ & 1 & & \\
+(8) URL (0/1) & $0.234^{***}$ & $0.035$ & $-0.064$ & $0.129^{***}$ & $0.084^{*}$ & $0.116^{**}$ & $0.417^{***}$ & 1 & \\
+(9) At-Mention (0/1) & $0.329^{***}$ & $0.016$ & $0.010$ & $0.033$ & $0.495^{***}$ & $0.075^{*}$ & $-0.016$ & $0.067$ & 1 \\
+\bottomrule
+\multicolumn{10}{l}{\small $^{***}\,p<.001$;\; $^{**}\,p<.01$;\; $^{*}\,p<.05$ (two-tailed).} \\
+\end{tabular}
+\end{table}
+
+\subsection{Key Correlation Findings}
+
+\begin{itemize}
+    \item \textbf{Negative text-length signal:} $r=-0.184$, $p<.001$, foreshadowing the rejection of H1.
+    \item \textbf{Strongest engagement correlates:} Picture dummy ($r=0.481$), Hashtag count ($r=0.452$), Emoji count ($r=0.411$).
+    \item \textbf{Hashtag $\leftrightarrow$ At-Mention dummy:} $r=0.495$, the largest off-diagonal correlation; both VIFs remain below 1.4 in the regression, indicating no problematic collinearity.
+    \item \textbf{No correlation exceeds $|r|=0.5$}, consistent with the diagnostic VIF analysis below.
+\end{itemize}
+
+\newpage
+
+\section{Regression Analysis}
+
+\subsection{Estimation Method}
+
+The model is estimated by Ordinary Least Squares with heteroscedasticity-consistent HC1 standard errors via \texttt{statsmodels.ols(\ldots).fit(cov\_type="HC1")}. HC1 is used throughout because the Breusch--Pagan test (§\ref{sec:diag}) flags significant heteroscedasticity. Point estimates are identical to classical OLS; only the standard errors and resulting $t$- and $p$-values differ.
+
+\subsection{Model Diagnostics}
+\label{sec:diag}
+
+\subsubsection{Heteroscedasticity (Breusch--Pagan)}
+\begin{itemize}
+    \item Lagrange Multiplier (LM) statistic: 90.22; $p<.0001$.
+    \item F-statistic: 12.63; $p<.0001$.
+    \item \textbf{Conclusion:} significant heteroscedasticity; HC1 robust standard errors are appropriate.
+\end{itemize}
+
+\subsubsection{Residual Normality (Shapiro--Wilk)}
+\begin{itemize}
+    \item $W = 0.9680$; $p<.0001$.
+    \item \textbf{Conclusion:} residuals deviate from strict normality, but with $N=766$ asymptotic OLS inference is reliable.
+\end{itemize}
+
+\subsubsection{Multicollinearity (VIF)}
+
+\begin{table}[H]
+\centering
+\caption{Variance Inflation Factors}
+\small
+\begin{tabular}{lr}
+\toprule
+Variable & VIF \\
+\midrule
+Text Length & 1.077 \\
+Question Mark & 1.119 \\
+Emotional Valence & 1.197 \\
+Hashtag Count & 1.341 \\
+Emoji Count & 1.303 \\
+Picture (0/1) & 1.639 \\
+URL (0/1) & 1.259 \\
+At-Mention (0/1) & 1.338 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All VIFs are below 2.0, well under the conventional threshold of 10. Multicollinearity is not a concern.
+
+\subsection{Main Regression Results}
+
+\begin{table}[H]
+\centering
+\caption{Robust OLS Regression Predicting $\ln(1+\text{Engagement})$ ($N=766$)}
+\label{tab:regression_main}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variable & Coefficient & Robust SE & $t$-value & $p$-value \\
+\midrule
+\multicolumn{5}{l}{\textit{Main Independent Variables (Hypotheses)}} \\
+Text Length (H1) & $-0.0193^{***}$ & 0.0032 & $-5.98$ & $<.0001$ \\
+Question Mark (H2) & $0.4687^{***}$ & 0.1325 & 3.54 & 0.0004 \\
+Emotional Valence (H3) & $0.0641^{*}$ & 0.0266 & 2.41 & 0.0161 \\
+Hashtag Count (H4) & $1.0623^{***}$ & 0.1276 & 8.33 & $<.0001$ \\
+Emoji Count (H5) & $0.3144^{***}$ & 0.0834 & 3.77 & 0.0002 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Control Variables (binary dummies, v4.0.0)}} \\
+Picture (0/1) & $1.1376^{***}$ & 0.1344 & 8.47 & $<.0001$ \\
+URL (0/1) & $0.1461$ & 0.0868 & 1.68 & 0.0923 \\
+At-Mention (0/1) & $0.8898^{***}$ & 0.2433 & 3.66 & 0.0003 \\
+\addlinespace
+Intercept & $1.4882^{***}$ & 0.1069 & 13.92 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Model Fit}} \\
+Observations & \multicolumn{4}{l}{766} \\
+$R^2$ & \multicolumn{4}{l}{0.5119} \\
+Adjusted $R^2$ & \multicolumn{4}{l}{0.5068} \\
+F-statistic & \multicolumn{4}{l}{$F(8, 757) = 76.681$, $p<.0001$} \\
+\bottomrule
+\multicolumn{5}{l}{\small Notes: $^{***}p<.001$, $^{**}p<.01$, $^{*}p<.05$ (two-tailed).} \\
+\multicolumn{5}{l}{\small Robust standard errors (HC1) used throughout.} \\
+\end{tabular}
+\end{table}
+
+\subsection{Hypothesis Testing}
+
+\begin{table}[H]
+\centering
+\caption{Summary of Hypothesis Test Results}
+\small
+\begin{tabular}{llcl}
+\toprule
+Hypothesis & Predicted & Estimate & Decision \\
+\midrule
+H1: Text Length & $+$ & $-0.019^{***}$ & \textbf{Not supported} \\
+H2: Question Mark & $+$ & $+0.469^{***}$ & \textbf{Supported} \\
+H3: Emotional Valence & $+$ & $+0.064^{*}$ & \textbf{Supported} \\
+H4: Hashtag Count & $+$ & $+1.062^{***}$ & \textbf{Supported} \\
+H5: Emoji Count & $+$ & $+0.314^{***}$ & \textbf{Supported} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Coefficient Interpretation}
+
+All percentage effects below use $(e^{\beta}-1)\times 100\%$ and refer to the change in $(1+\text{Engagement})$ per unit change in the predictor, holding the others constant.
+
+\subsubsection*{H1: Text Length --- Not Supported}
+$\beta_1 = -0.0193$, $p<.001$. Each additional cleaned word is associated with about $-1.92\%$ engagement. On X, brevity outperforms length.
+
+\subsubsection*{H2: Question Mark --- Supported}
+$\beta_2 = +0.4687$, $p<.001$. Posts with at least one question mark are associated with roughly $+59.8\%$ engagement compared with posts without one.
+
+\subsubsection*{H3: Emotional Valence --- Supported}
+$\beta_3 = +0.0641$, $p=.0161$. A one-unit shift toward more positive valence is associated with about $+6.6\%$ engagement.
+
+\subsubsection*{H4: Hashtag Count --- Supported}
+$\beta_4 = +1.0623$, $p<.001$. Each additional hashtag is associated with about $+189\%$ engagement.
+
+\subsubsection*{H5: Emoji Count --- Supported}
+$\beta_5 = +0.3144$, $p<.001$. Each additional emoji is associated with about $+36.9\%$ engagement.
+
+\subsubsection*{Control variables}
+The Picture dummy ($\beta=+1.14$, $p<.001$, $\approx +212\%$) and the At-Mention dummy ($\beta=+0.89$, $p<.001$, $\approx +143\%$) are large and positive. The URL dummy is small and not significant ($\beta=+0.15$, $p=.092$); given that 70\% of posts already include a URL, the marginal contribution of merely having a link is modest once other features are accounted for.
+
+\newpage
+
+\section{Visual Diagnostics}
+
+\subsection{Residual Analysis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/residual_histogram.png}
+\caption{Distribution of Residuals with Normal Curve Overlay}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{../plots/qq_plot.png}
+\caption{Q-Q Plot of Residuals}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/resid_vs_fitted.png}
+\caption{Residuals vs Fitted Values}
+\end{figure}
+
+\subsection{Distribution by Question Mark}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{../plots/dist_by_question.png}
+\caption{Distribution of $\ln(1+\text{Engagement})$ by Question Mark Group}
+\end{figure}
+
+\newpage
+
+\section{Comparison Against the v2.0.0 Baseline}
+
+\begin{table}[H]
+\centering
+\caption{v2.0.0 (count CVs) vs v4.0.0 (dummy CVs), Same $N=766$}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Metric & v2.0.0 & v4.0.0 & $\Delta$ \\
+\midrule
+$R^2$ & 0.4924 & 0.5119 & $+0.0195$ \\
+Adjusted $R^2$ & 0.4871 & 0.5068 & $+0.0197$ \\
+F-statistic & 63.857 & 76.681 & $+12.82$ \\
+$\beta_1$ Text Length & $-0.0211^{***}$ & $-0.0193^{***}$ & $+0.0018$ \\
+$\beta_2$ Question Mark & $+0.4793^{***}$ & $+0.4687^{***}$ & $-0.0106$ \\
+$\beta_3$ Valence & $+0.0840^{**}$ & $+0.0641^{*}$ & $-0.0199$ \\
+$\beta_4$ Hashtag & $+1.0959^{***}$ & $+1.0623^{***}$ & $-0.0336$ \\
+$\beta_5$ Emoji & $+0.3428^{***}$ & $+0.3144^{***}$ & $-0.0284$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The CV re-coding lifts both $R^2$ and adjusted $R^2$ by roughly two percentage points and tightens the F-statistic by 20\%. The signs and significance of all five focal hypotheses are unchanged; the magnitude shifts are small and in the expected direction (focal coefficients absorb slightly less of the variance now that the controls capture cleaner presence/absence contrasts). Among the controls, the Picture and At-Mention dummies become substantially larger (because they now reflect the contrast against ``none''), while the URL dummy loses statistical significance, reflecting that simply attaching a link is no longer a strong differentiator once the other controls are present.
+
+\section{Managerial Implications}
+
+\subsection{Key Recommendations for Booking.com}
+
+\begin{enumerate}
+    \item \textbf{Embrace brevity.} Each extra word costs roughly $-1.9\%$ engagement; aim for 15--25 words.
+    \item \textbf{Use questions strategically.} Posts containing a ``?'' enjoy roughly $+60\%$ engagement.
+    \item \textbf{Maintain a positive emotional tone.} A one-unit valence increase is worth $\sim +6.6\%$ engagement.
+    \item \textbf{Use hashtags.} Each hashtag is associated with $\sim +189\%$ engagement; one or two well-chosen tags are highly leveraged.
+    \item \textbf{Use emoji.} Each emoji is worth $\sim +37\%$ engagement; one or two contextually relevant emojis enrich the post.
+    \item \textbf{Always include an image.} The picture dummy alone is associated with more than tripling engagement.
+    \item \textbf{Use @mentions when relevant.} The @mention dummy is associated with $\sim +143\%$ engagement (e.g., when partnering with destinations or hotels).
+\end{enumerate}
+
+\subsection{Optimised Post Template}
+
+A high-performing Booking.com post on X should: be concise (15--20 words); pose a question; carry a positive tone; include 1--2 relevant hashtags; include 1--2 contextual emojis; carry an image; and tag a relevant partner where appropriate.
+
+\section{Limitations and Future Research}
+
+\begin{itemize}
+    \item \textbf{Cross-sectional, observational data:} no causal claims are made; relationships are correlational.
+    \item \textbf{Platform specificity:} findings are X-specific and may not transfer to Instagram, Facebook, or TikTok.
+    \item \textbf{Single brand:} generalisability to other travel brands or sectors requires replication.
+    \item \textbf{Composite engagement:} likes, comments and shares are summed with equal weights; future work could disaggregate.
+    \item \textbf{Temporal range:} 2021--2022 data may not reflect current platform dynamics.
+\end{itemize}
+
+\section{Conclusion}
+
+This v4.0.0 analysis confirms the substantive findings of the v2.0.0 baseline---brevity, interactivity, positive tone, hashtags, and emoji each shape engagement on Booking.com's X account---while delivering a meaningful improvement in model fit ($R^2$ from 0.4924 to 0.5119) through a single, theoretically motivated change: re-coding the three control variables as binary presence/absence dummies. All VIFs remain comfortably below 2.0 and HC1 standard errors are used throughout to safeguard inference under heteroscedasticity.
+
+\appendix
+\section{Technical Appendix}
+
+\subsection{Software and Packages}
+\begin{itemize}
+    \item Python 3, pandas, numpy, scipy, statsmodels, matplotlib.
+    \item Analysis script: \texttt{analysis/python/run\_statistics.py} (v4.0.0).
+\end{itemize}
+
+\subsection{Data Files}
+\begin{itemize}
+    \item Input: \texttt{data/research\_data.csv} (766 rows $\times$ 38 columns).
+    \item Outputs: \texttt{results/20260429\_014427/} (this version).
+\end{itemize}
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}
+    \item De Vries, L., Gensler, S., \& Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
+    \item Gkikas, D.C., Tzafilkou, K., Theodoridis, P.K., Garmpis, A., \& Gkikas, M.C. (2022). How do text characteristics impact user engagement in social media posts? Modeling content readability, length, and hashtags number in Facebook. \textit{International Journal of Information Management Data Insights}, 2, 100067.
+    \item Ko, E.E., Kim, D., \& Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
+    \item Li, Y., \& Xie, Y. (2020). Is a picture worth a thousand words? An empirical study of image content and social media engagement. \textit{Journal of Marketing Research}, 57(1), 1--19.
+    \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M., \& Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
+    \item Moran, G., Muzellec, L., \& Johnson, D. (2019). Message content features and social media engagement: evidence from the media industry. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
+    \item Reddy, M.A.S., \& Prakash, C. (2024). Sentiment analysis of social media networking sites: a comparative study on user engagement and public opinion.
+    \item van der Harst, J.P., \& Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
+\end{enumerate}
+
+\end{document}

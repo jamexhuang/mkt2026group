@@ -1,0 +1,183 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+% 中文：標楷體
+\IfFontExistsTF{BiauKai}
+  {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{BiauKai}}
+  {\IfFontExistsTF{DFKai-SB}
+    {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{DFKai-SB}}
+    {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{標楷體}}}
+\IfFontExistsTF{BiauKai}
+  {\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{BiauKai}}
+  {\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{DFKai-SB}}
+\IfFontExistsTF{BiauKai}
+  {\setCJKmonofont{BiauKai}}
+  {\setCJKmonofont{DFKai-SB}}
+
+\renewcommand{\refname}{參考文獻}
+\renewcommand{\figurename}{圖}
+\renewcommand{\tablename}{表}
+
+\setstretch{1.3}
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{2em}
+
+\titleformat{\section}{\large\bfseries}{\thesection、}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+
+\title{Booking.com 在 X 上的貼文如何驅動社群互動？\\[0.3em]
+\large 766 則品牌貼文之內容特徵分析}
+\author{[組別] \quad BMAN74042 行銷分析學，2025--26}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{研究背景}
+
+Booking.com 是全球最大型的數位旅遊平台之一，串連數以百萬計的旅人預訂超過 200 個國家的住宿、機票與體驗。其總部位於阿姆斯特丹，隸屬 Booking Holdings 集團，在飽和的線上旅遊市場中與 Expedia、Airbnb 競爭——對於這類規模的玩家而言，限制成長的不是庫存而是「注意力」。儘管 Booking.com 在績效行銷上投入巨大，X 平台上的有機社群觸及仍是低成本的品牌建構管道。我們之所以選擇 Booking.com，是因為其 X 貼文幾乎全靠關於目的地、優惠與靈感的文字敘事，是隔離「文字內容特徵如何牽動讀者反應」之絕佳場域。本研究將社群互動定義為每則貼文的按讚、留言與分享數總和，這項複合指標可同時涵蓋三種強度的回饋，並貼合 X 演算法以「互動」做為觸及加權的方式，因此是品牌社群團隊最具可操作意義的指標。
+
+\section{內容特徵與假說}
+
+本研究檢驗五項可能影響 Booking.com 在 X 上互動之文字特徵。所選取之特徵涵蓋既有品牌頁面研究的三條理論路徑：資訊密度（文字長度）、互動線索（問號）與情感訊號（情緒效價、hashtag、emoji）。
+
+\textbf{文字長度}定義為原始貼文經六階段清理（移除 URL、@提及、hashtag、標點、數字、停用詞）後可辨識之英文字 token 數量。文獻指出較長之文案可承載更豐富之資訊並傳遞專業形象（Gkikas et al., 2022）；惟在快速捲動的微網誌情境下，較短之文案享有「認知處理省力」優勢（van der Harst \& Angelopoulos, 2024）。鑒於旅遊品牌端文獻在此議題上仍偏正向，因此提出：
+
+\textbf{H1.} 文字長度與 Booking.com 於 X 上的社群互動呈正向關係。
+
+\textbf{問號}為二元變數，標記原始貼文是否至少包含一個「?」。問號猶如對話邀請，能促使讀者回應，且常被推薦演算法視為「容易激發討論」之信號。品牌頁面研究多次將問號連結到留言與分享之提升（De Vries et al., 2012; Moran et al., 2019）。據此提出：
+
+\textbf{H2.} 問號之出現與互動呈正向關係。
+
+\textbf{情緒效價}為以字典法計算之連續分數，反映貼文 token 之平均愉悅度，採 1--9 點情感量表並以中性點為基準居中化。旅遊內容多被讀者出於嚮往動機而消費，因此正向效價可望引起共鳴並擴大轉發行為（Reddy \& Prakash, 2024）。故提出：
+
+\textbf{H3.} 較高之正向情緒效價與互動呈正向關係。
+
+\textbf{Hashtag 數}為原始貼文中 \texttt{\#tag} 之出現數。Hashtag 透過主題搜尋與熱門榜擴大被發現之機會，Twitter 品牌頁面研究亦指出，雖有「過度標記如垃圾訊息」之風險，hashtag 整體仍對能見度驅動之互動有正向淨效果（Gkikas et al., 2022）。據此提出：
+
+\textbf{H4.} Hashtag 數與互動呈正向關係。
+
+\textbf{Emoji 數}為原始貼文中 emoji code-point 之數量。Emoji 為視覺化語言線索，可在單一字元中壓縮情感、釋放輕鬆訊號並提升可讀性；在品牌相關使用者內容中，emoji 與較高之互動及更強之消費者—品牌連結相關（Ko et al., 2022）。對於休閒導向品牌，提出：
+
+\textbf{H5.} Emoji 數與互動呈正向關係。
+
+上述五項假說將同時檢驗，並控制圖片、URL 與 @提及之出現——此三項為非文字或關係層級之貼文屬性，若不加控制，可能混淆焦點變數之效果。
+
+\section{資料}
+
+本研究所使用之資料來自一份公開整理之 Booking.com 在 X 平台上之貼文資料集。原始資料於 2023 年 1 月 1 日透過 Twitter 學術研究 API 蒐集，採「最近 3{,}200 則貼文」之檢索原則——此為 API 限制下單一帳號可取得之最大量，可確保品牌活動之近期樣本充分而具代表性。本研究之分析單位為個別貼文，每筆觀察值為一則原創貼文及其互動結果（按讚、留言、分享）。
+
+為與「品牌端原創內容如何驅動互動」之研究目的對齊，回覆與轉推已於資料釋出前剔除——此類內容反映被動回應或轉散播，而非品牌原創傳播。含影片之貼文亦同時排除，以使分析聚焦於文字與基本視覺特徵（圖片、URL、@提及），避免混入影片獨有且差異甚大的互動動能。在分析階段不再施加任何列層過濾；最終樣本為 766 則原創貼文，時間範圍自 2021 年 11 月 1 日至 2022 年 11 月 21 日，其中 104 則互動量為零，其餘觀察值橫跨完整正向區間，最大值達 2{,}474。
+
+此一資料集適合本研究目的：其樣本量足夠且文字特徵與互動結果之變異可觀；採單一品牌可使語氣與目標受眾保持一致，更能精準辨識內容特徵與互動之關係；資料蒐集程序與納入標準均明確記載，有利透明與可重現。我們亦坦承「最近 3{,}200 則」之 API 規則使較早期貼文未被涵蓋，惟此限制對所有品牌帳號對稱施加，不會偏誤本研究之 Booking.com 內部比較。13 個月之時窗亦橫跨兩個明顯的旅遊季節，自然引入主題多樣性。資料全程以觀察性資料處理且不施加抽樣權重；§4 之敘述檢視已點出原始互動量之嚴重右偏，亦因此於 §5 之迴歸規格採對數轉換後之應變數。
+
+\section{變數測量}
+
+應變數（DV）為社群互動量，定義為 $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$。由於原始互動量嚴重右偏（偏態 $=7.67$，最大值 $=2{,}474$，並含 104 則零互動），採 $\ln(1+\text{Engagement}_i)$，以 \texttt{numpy.log1p} 計算；$+1$ 之偏移可保留零互動觀察值，且自然對數轉換後 DV 之偏態降至 1.00，接近對稱。
+
+五項自變數（IV）皆於 Python 中以 \texttt{pandas} 與 NLTK／scikit-learn 標準停用詞清單擷取。\textbf{文字長度}為經六階段清理後最終文字之 whitespace token 數，依序移除 URL 與其前後協定殘片、@提及、hashtag、標點、數字、英文停用詞，並將大小寫正規化。\textbf{問號}為二元指標（原始貼文含至少一個「?」者為 1），全樣本中 16.7\% 之貼文符合。\textbf{情緒效價}由清理後文字斷詞後，與一份 1--9 點之效價字典（Warriner 系 ANEW 擴展）匹配，每則貼文之分數先以匹配 token 平均，後減去 4.5 居中化，使 0 對應中性、正（負）值對應愉悅（不悅）；無匹配 token 之貼文記為 0。\textbf{Hashtag 數}與 \textbf{Emoji 數}為原始貼文中 \texttt{\#tag} 與 emoji code-point 之計數；二者皆極度右偏，多數貼文未使用。
+
+控制變數（CV）共三項：\textbf{圖片（0/1）}、\textbf{URL（0/1）}、\textbf{@提及（0/1）}，分別於至少含一張圖片、一個 URL 或一個 @提及時記為 1，否則為 0。將控制變數編為 0/1 而非原始計數，一方面反映此三變數於本資料近 96\% 集中於 \{0, 1\} 之雙峰結構，另一方面對應內容設計上真正具行動意義之對比——「有附件」與「沒附件」遠比「附件多寡」更貼近文案決策。
+
+\begin{table}[H]
+\centering\small
+\caption{敘述統計（$N=766$）}
+\begin{tabular}{lrrrrrr}
+\toprule
+變數 & 平均 & 標準差 & 最小 & 中位數 & 最大 & 偏態 \\
+\midrule
+$\ln(1+\text{Engagement})$ & 1.942 & 1.572 & 0.000 & 1.609 & 7.814 & 1.001 \\
+文字長度（字）& 23.453 & 12.257 & 0 & 22 & 53 & 0.239 \\
+問號（0/1）& 0.167 & 0.373 & 0 & 0 & 1 & 1.785 \\
+情緒效價 & 0.789 & 1.528 & $-3.352$ & 0.000 & 3.948 & 0.371 \\
+Hashtag 數 & 0.145 & 0.489 & 0 & 0 & 3 & 3.817 \\
+Emoji 數 & 0.398 & 0.884 & 0 & 0 & 13 & 5.261 \\
+圖片（0/1）& 0.287 & 0.453 & 0 & 0 & 1 & 0.941 \\
+URL（0/1）& 0.698 & 0.459 & 0 & 1 & 1 & $-0.865$ \\
+@提及（0/1）& 0.080 & 0.271 & 0 & 0 & 1 & 3.105 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+敘述結果與既有品牌微網誌研究之預期一致：log 轉換後之互動量略呈右偏；約 17\% 之貼文含問號；29\% 含圖片；70\% 含 URL；僅 8\% 涉及 @提及，顯示合作夥伴式之共同推廣於 Booking.com 社群操作中相對少見。Hashtag 與 emoji 普遍稀疏（平均皆低於 0.5），多數貼文皆不使用；平均文字長度為 23 字，遠低於平台字數上限，反映其編輯風格本即偏好精簡。互動量最大值 2{,}474 經人工檢視後屬一則熱門節慶活動文，視為真實觀察值予以保留；對數轉換已可有效抑制其槓桿效應，又能保留其變異資訊。所有變數皆無遺失值，故無需逐筆刪除，分析樣本與敘述樣本同為 766 則。
+
+\section{模型規格}
+
+由於應變數為非負之互動計數，原始分布嚴重右偏（偏態 $=7.67$），但經 $\ln(1+\cdot)$ 轉換後接近對稱（偏態 $=1.00$），我們採對數線性 OLS，而非負二項或零膨脹負二項此類計數模型。對數規格可穩定變異、提供可直接解讀之半彈性，亦能透過 $+1$ 偏移容納 104 則零互動貼文；先導性之負二項替代估計顯示焦點係數方向穩定但整體配適不及對數線性，故採對數線性為最終規格。
+
+完整均值方程為：
+\begin{equation}\small
+\begin{aligned}
+\ln(1+\text{Engagement}_i) ={}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{PictureD}_i + \beta_7\text{URLD}_i + \beta_8\text{AtMentionD}_i + \varepsilon_i
+\end{aligned}
+\end{equation}
+
+於係數解讀前先評估多元共線性。八項 VIF 皆低於 2（最大 $=1.64$ 為圖片虛擬變數，最小 $=1.08$ 為文字長度），遠低於 10 之常見「嚴重共線」門檻，故不剔除任何變數，八項預測子同步保留。Breusch--Pagan 檢定（對殘差平方）拒絕同質變異數（LM $=90.22$，$p<.0001$），全程採用 HC1（White--MacKinnon）異質變異數穩健標準誤，於 \texttt{statsmodels} 中以 \texttt{cov\_type="HC1"} 設定。點估計與一般 OLS 相同，僅標準誤、$t$ 值與 $p$ 值有別。殘差略違反常態（Shapiro--Wilk $W=0.97$），但於 $N=766$ 下可仰賴中央極限定理，不影響推論有效性。
+
+我們比較了多種規格，重點差異在於三項控制變數之編碼方式以及是否納入驚嘆號指標。原始計數型控制變數之版本得 $R^2=0.4924$、調整後 $R^2=0.4871$；本報告採用之 0/1 控制變數版本則於相同樣本下得 $R^2=0.5119$、調整後 $R^2=0.5068$，VIF 未升高且所有焦點假說方向不變。另一變體加入驚嘆號虛擬變數，未帶來額外配適提升，故基於精簡原則拒絕。最終以「優於整體配適、具精簡性、共線性可接受（所有 VIF $<2$）」之原則保留 0/1 控制變數規格。穩健性檢查另以一般 OLS 標準誤、HC3 標準誤與按月分群之穩健標準誤重估，所有焦點預測子之顯著性結論在四種估計設定下皆保持一致，提升「結論非單一推論方法所致」之信心。
+
+\section{研究結果}
+
+表 \ref{tab:reg} 呈現最終迴歸結果。模型解釋 $\ln(1+\text{Engagement})$ 之變異達 51.2\%（$F(8,757)=76.68$，$p<.0001$），對於橫斷面社群媒體資料而言屬強配適。所有假說檢定均採 HC1 穩健標準誤與雙尾 $p$ 值；下文百分比效果以 $(e^{\beta}-1)\times 100\%$ 計算，並指其他變數不變下對 $(1+\text{Engagement})$ 之相對變化。焦點變數兩兩相關係數均小於 $|r|=0.50$，表 \ref{tab:reg} 之係數並非源自共線性。
+
+\begin{table}[H]
+\centering\small
+\caption{穩健 OLS（HC1）預測 $\ln(1+\text{Engagement})$，$N=766$}
+\label{tab:reg}
+\begin{tabular}{lcccc}
+\toprule
+變數 & 係數 & 穩健 SE & $t$ & $p$ \\
+\midrule
+文字長度（H1）& $-0.0193^{***}$ & 0.0032 & $-5.98$ & $<.0001$ \\
+問號（H2）& $0.4687^{***}$ & 0.1325 & 3.54 & 0.0004 \\
+情緒效價（H3）& $0.0641^{*}$ & 0.0266 & 2.41 & 0.0161 \\
+Hashtag 數（H4）& $1.0623^{***}$ & 0.1276 & 8.33 & $<.0001$ \\
+Emoji 數（H5）& $0.3144^{***}$ & 0.0834 & 3.77 & 0.0002 \\
+圖片（0/1）& $1.1376^{***}$ & 0.1344 & 8.47 & $<.0001$ \\
+URL（0/1）& $0.1461$ & 0.0868 & 1.68 & 0.0923 \\
+@提及（0/1）& $0.8898^{***}$ & 0.2433 & 3.66 & 0.0003 \\
+截距 & $1.4882^{***}$ & 0.1069 & 13.92 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{$R^2 = 0.5119$，調整後 $R^2 = 0.5068$，所有 VIF $<2$。} \\
+\multicolumn{5}{l}{$^{***}p<.001$、$^{**}p<.01$、$^{*}p<.05$（雙尾）。} \\
+\end{tabular}
+\end{table}
+
+文字長度之係數為負且高度顯著（$\beta_1=-0.019$，$p<.001$）：每多一個經清理之字，與 $(1+\text{Engagement})$ 約下降 1.9\%。預測方向與 H1 相反，故 \textbf{H1 未獲支持}；於此快速捲動且字數受限之平台上，「精簡」似乎主導「資訊量」。問號之出現與互動量約增加 $(e^{0.4687}-1)\approx 60\%$（$p<.001$），與「對話線索」機制一致，故 \textbf{H2 獲支持}。情緒效價每提升一單位與互動量約增加 6.6\%（$\beta_3=+0.064$，$p=.016$），幅度溫和但統計顯著，故 \textbf{H3 獲支持}。每多一個 hashtag 與互動量約增加 189\%（$\beta_4=+1.062$，$p<.001$），為焦點變數中標準化效果最大者，故 \textbf{H4 獲支持}。每多一個 emoji 與互動量約增加 37\%（$\beta_5=+0.314$，$p<.001$），故 \textbf{H5 獲支持}。
+
+值得補充說明的是 H1 之拒絕，與既有 Facebook 品牌頁面文獻（Gkikas et al., 2022）方向相反。X 平台之情境差異主要在兩處：貼文於高速時間軸中爭奪注意力，每多一句子句皆提高跳離風險；而較長之文案常偏向交易性資訊，反而抑制情感訊號。本係數應視為「平台特定」之認知處理省力面向證據（van der Harst \& Angelopoulos, 2024），而非全面否定「資訊量」之價值。控制變數方面，圖片之出現與互動量大幅上升相關（$\beta=+1.138$，約 $+212\%$，$p<.001$），@提及亦然（$\beta=+0.890$，約 $+143\%$，$p<.001$）。二者於 0/1 重新編碼後效果擴大，反映其對比由「附件多寡」轉為「有附件 vs.\ 無附件」，後者才是內容設計真正關切之對比。URL 虛擬變數則正向但不顯著於 5\% 水準（$\beta=+0.146$，$p=.092$）；考量 70\% 之貼文已附帶 URL，「是否附帶連結」於納入圖片、@提及與其他文字特徵後邊際貢獻不再顯著，且可能反映明顯促銷貼文之較低分享率。穩健性檢查在計數型 CV、一般 OLS、HC3 與按月分群誤差下皆未改變任何假說判定。本研究全程採相關性語氣——研究設計屬觀察性，呈現之模式為 Booking.com 內部之關聯而非因果效果，建議讀為精煉之編輯指引而非保證之提升幅度。
+
+\section{管理意涵}
+
+將結果轉化為文案指引，本研究為 Booking.com 社群團隊提供一份明確之內容配方。第一，\textbf{維持簡短}：文字長度之負向係數搭配 H4--H5 等爭奪字數預算之特徵，建議鎖定 15--25 字之區間。第二，\textbf{帶上問句}：問號虛擬變數本身即關聯約 60\% 之互動提升，例如「你 2026 年的夢想城市是哪裡？」即屬高槓桿提示。第三，\textbf{維持嚮往且正向之語氣}：效價每提升一單位即帶來約 6.6\% 之提升，編輯文案應以興奮感、感官細節、利益框架取代純粹交易語言。第四，\textbf{務必搭配圖片}：圖片虛擬變數為模型中單一最大之提升因子（約 $+212\%$），任何「無圖」草稿建議列為審稿警示項。第五，\textbf{使用一至兩個相關 hashtag}：每多一個 hashtag 對應約近三倍之互動，但堆疊超過兩個易進入垃圾訊息範疇且稀釋訊息清晰度。第六，\textbf{加入一至兩個情境化 emoji}（如旅遊象形符號）：每個 emoji 約帶來 37\% 之提升，並可作為時間軸上之低成本視覺鉤子。第七，\textbf{僅於合作真實時 @提及夥伴}：@提及虛擬變數對應約 $+143\%$，但此可能反映共同推廣綜效，不宜濫用。具體舉例：表現平淡之中性貼文「Skip the park and park it at the hotel」可改寫為「厭倦排隊嗎？把它換成 Walt Disney World Swan Reserve 的池畔涼亭——你 2026 年想逃到哪裡？」，加上一個旅遊 emoji 與一個 hashtag，可同時操作五個槓桿。代價提醒：高情緒密度或 hashtag 密集之貼文可能侵蝕品牌真實性與專業感知，建議以 A/B 測試檢驗後再放大規模。
+
+\section{限制與未來改善}
+
+本研究為觀察性、單一平台之設計，故不主張因果亦不宜跨平台推廣；發文時間、季節、主題情境與同期付費推廣等不可觀察之干擾因子可能造成係數偏誤。情緒效價以字典法測量，無法辨識諷刺、反諷或旅遊特定之俚語；以等權合計按讚、留言與分享，亦將不同強度之回應視為可替代。此資料時窗亦早於 X 近期演算法調整。未來研究可分項建模互動指標、複製於 Instagram 與 TikTok、延長時窗、改用 transformer 情感模型，並結合小型隨機化內容實驗。
+
+\section*{參考文獻}
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item De Vries, L., Gensler, S., \& Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
+    \item Gkikas, D.C., et al. (2022). How do text characteristics impact user engagement in social media posts? \textit{International Journal of Information Management Data Insights}, 2, 100067.
+    \item Ko, E.E., Kim, D., \& Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
+    \item Moran, G., Muzellec, L., \& Johnson, D. (2019). Message content features and social media engagement. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
+    \item Reddy, M.A.S., \& Prakash, C. (2024). Sentiment analysis of social media networking sites.
+    \item van der Harst, J.P., \& Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
+\end{enumerate}
+
+\end{document}

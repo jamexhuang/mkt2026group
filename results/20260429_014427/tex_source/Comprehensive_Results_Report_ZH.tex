@@ -1,0 +1,492 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+% 中文：標楷體 BiauKai
+\IfFontExistsTF{BiauKai}
+  {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{BiauKai}}
+  {\IfFontExistsTF{DFKai-SB}
+    {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{DFKai-SB}}
+    {\setCJKmainfont[AutoFakeBold=2,AutoFakeSlant=.2]{標楷體}}}
+\IfFontExistsTF{BiauKai}
+  {\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{BiauKai}}
+  {\setCJKsansfont[AutoFakeBold=2,AutoFakeSlant=.2]{DFKai-SB}}
+\IfFontExistsTF{BiauKai}
+  {\setCJKmonofont{BiauKai}}
+  {\setCJKmonofont{DFKai-SB}}
+
+\renewcommand{\contentsname}{目錄}
+\renewcommand{\refname}{參考文獻}
+\renewcommand{\figurename}{圖}
+\renewcommand{\tablename}{表}
+\renewcommand{\appendixname}{附錄}
+
+\setstretch{1.3}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{2em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Booking.com 社群文字特徵與互動成效完整結果報告\\[0.3em]
+\large 第 4.0.0 版（控制變數改為 0/1 虛擬變數）\\[0.3em]
+\small 產出時間：2026 年 4 月 29 日}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{執行摘要}
+\addcontentsline{toc}{section}{執行摘要}
+
+本報告呈現 Booking.com 社群媒體互動研究第 4.0.0 版之完整統計結果。所有分析皆使用 Python 統計腳本，並以異質變異數穩健（HC1）標準誤推論。相對於 v2.0.0 基準（資料夾 \texttt{20260330\_151218}），第 4.0.0 版唯一的方法論調整，是將三個控制變數（圖片、URL、@提及）由原始計數改為二元虛擬變數（出現／不出現）。在相同的 $N=766$ 樣本下，這項單一更動使模型 $R^2$ 從 0.4924 提升至 0.5119（調整後 $R^2$ 從 0.4871 提升至 0.5068），所有 VIF 仍維持在 2.0 以下，且五項焦點假說的方向與顯著性皆未變動。
+
+更動的理論動機在於：在微網誌平台上，能否抓住讀者注意力的關鍵，是貼文是否帶有圖片、連結或提及，而非數量多寡。將控制變數操作化為虛擬變數，可避免少數多附件貼文造成的雜訊，並讓更多變異被歸因於焦點文字特徵。
+
+\section{研究架構}
+
+\subsection{研究問題}
+\textbf{Booking.com 在 X 上的貼文文字特徵，如何影響社群互動表現？}
+
+\subsection{研究假說}
+
+本研究檢驗以下五項焦點假說：
+
+\begin{enumerate}[label=H\arabic*.]
+    \item 文字長度與社群互動呈正相關。
+    \item 問號使用與社群互動呈正相關。
+    \item 情緒效價與社群互動呈正相關。
+    \item Hashtag 數量與社群互動呈正相關。
+    \item Emoji 使用與社群互動呈正相關。
+\end{enumerate}
+
+\subsection{模型規格}
+
+本研究估計以下迴歸式：
+
+\begin{equation}
+\begin{aligned}
+\ln(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{PictureD}_i + \beta_7\text{URLD}_i \\
+& + \beta_8\text{AtMentionD}_i + \varepsilon_i
+\end{aligned}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$
+    \item 應變數為自然對數轉換 $\ln(1 + \text{Engagement}_i)$（以 \texttt{numpy.log1p} 計算），用以處理右偏並保留零互動觀察值。本報告所稱「log」皆指自然對數。
+    \item 焦點自變數：TextLength（H1）、Question（H2）、Valence（H3）、Hashtag（H4）、Emoji（H5）。
+    \item 控制變數（v4.0.0 改為 0/1 虛擬變數）：PictureD = $\mathbb{1}[\text{圖片數}>0]$、URLD = $\mathbb{1}[\text{URL 數}>0]$、AtMentionD = $\mathbb{1}[\text{@提及數}>0]$。
+\end{itemize}
+
+\paragraph{係數解讀。}對於連續型自變數，$X_k$ 每增加一單位，與 $(1+\text{Engagement})$ 大致變動 $(e^{\beta_k}-1)\times 100\%$。對於二元變數，相同公式對應「出現相對於不出現」的條件均值差距。當實際互動數遠大於 1 時，$+1$ 偏移可忽略不計。
+
+\section{資料說明}
+
+\subsection{資料集特徵}
+
+\begin{itemize}
+    \item \textbf{樣本數：}$N=766$，皆為 Booking.com 官方 X 帳號之原創貼文。
+    \item \textbf{時間範圍：}2021/11/01 至 2022/11/21。
+    \item \textbf{資料來源：}\texttt{data/research\_data.csv}（公開整理之資料集）。
+    \item \textbf{欄位數：}38 欄，含原始互動指標、文字特徵與貼文層級附件。
+    \item \textbf{過濾原則：}回覆、轉推與含影片之貼文已於資料集釋出前剔除；v4.0.0 不再施加任何列層過濾，以與 v2.0.0 之 $N=766$ 完全一致。
+\end{itemize}
+
+\subsection{變數定義}
+
+\begin{table}[H]
+\centering
+\caption{變數定義與操作化}
+\small
+\begin{tabular}{@{}p{0.20\textwidth} p{0.16\textwidth} p{0.56\textwidth}@{}}
+\toprule
+變數 & 角色 & 操作化定義 \\
+\midrule
+社群互動量 & 應變數 & $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$，並取 $\ln(1+\text{Engagement}_i)$ 處理右偏 \\
+\midrule
+文字長度 & 焦點自變數（H1）& 經六階段清理後最終字數（\texttt{text\_clean6}），詳見 §\ref{sec:preproc} \\
+問號 & 焦點自變數（H2）& 二元虛擬：原始貼文含至少一個「?」者為 1，否則為 0 \\
+情緒效價 & 焦點自變數（H3）& 字典法情感分數：將 token 與 1--9 效價字典（Warriner 系 ANEW 擴展）匹配後取均值並減去 4.5；正值為愉悅、負值為不悅；無匹配 token 之貼文記為 0 \\
+Hashtag 數量 & 焦點自變數（H4）& 原始貼文中 \texttt{\#tag} 之數量 \\
+Emoji 數量 & 焦點自變數（H5）& 原始貼文中 emoji code-point 之數量 \\
+\midrule
+圖片（0/1）& 控制變數（v4）& 含至少一張圖片者為 1，否則為 0 \\
+URL（0/1）& 控制變數（v4）& 含至少一個 URL 者為 1，否則為 0 \\
+@提及（0/1）& 控制變數（v4）& 含至少一個 @提及者為 1，否則為 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{何以採用虛擬變數？}原 v2.0.0 規格使用原始計數。實證上，96\% 以上貼文之圖片數為 0 或 1，URL 與 @提及之分布亦同樣集中於 \{0, 1\}。在此資料下，二元化能更貼近實際變異。理論上，「一張圖」與「兩張圖」之間的邊際差異難以獨立解讀；對於內容策略而言，真正具行動意義的對比，是「有附件」與「沒附件」。
+
+\subsection{文字前處理流程}
+\label{sec:preproc}
+
+原始貼文 \texttt{tweet\_content} 依序經六階段清理（\texttt{text\_clean1}--\texttt{text\_clean6}）後，再計算 \texttt{length}、\texttt{valence} 與 n-gram 特徵：
+
+\begin{enumerate}
+    \item \texttt{text\_clean1}：移除 URL、@提及、\#hashtag 與標記殘留，保留大小寫與 emoji。
+    \item \texttt{text\_clean2}：移除驚嘆號（同步擷取 \texttt{exclamation} 計數）。
+    \item \texttt{text\_clean3}：全部轉小寫。
+    \item \texttt{text\_clean4}：移除剩餘標點與數字。
+    \item \texttt{text\_clean5}：移除英文停用詞（NLTK／scikit-learn 標準清單）。
+    \item \texttt{text\_clean6}：最終清理結果；\texttt{length} 為以空白切分後之 token 數。
+\end{enumerate}
+
+下游再對 \texttt{text\_clean6} 進行斷詞與 Porter 詞幹化，最後與效價字典比對。最終僅 \texttt{length} 與 \texttt{valence} 進入迴歸；中介欄位保留以利稽核。
+
+\newpage
+
+\section{敘述統計}
+
+\subsection{摘要統計}
+
+\begin{table}[H]
+\centering
+\caption{敘述統計（$N=766$）}
+\label{tab:desc_full}
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+變數 & 平均 & 標準差 & 最小 & Q1 & 中位數 & Q3 & 最大 & 偏態 \\
+\midrule
+$\ln(1+\text{Eng.})$ & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+文字長度（字）& 23.453 & 12.257 & 0.000 & 14.000 & 22.000 & 33.000 & 53.000 & 0.239 \\
+問號（0/1）& 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
+情緒效價 & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.046 & 3.948 & 0.371 \\
+Hashtag 數 & 0.145 & 0.489 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 3.817 \\
+Emoji 數 & 0.398 & 0.884 & 0.000 & 0.000 & 0.000 & 1.000 & 13.000 & 5.261 \\
+圖片（0/1）& 0.287 & 0.453 & 0.000 & 0.000 & 0.000 & 1.000 & 1.000 & 0.941 \\
+URL（0/1）& 0.698 & 0.459 & 0.000 & 0.000 & 1.000 & 1.000 & 1.000 & $-0.865$ \\
+@提及（0/1）& 0.080 & 0.271 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 3.105 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{二元變數頻率分布}
+
+\begin{table}[H]
+\centering
+\caption{四項二元變數之頻率（$N=766$）}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+變數 & 0（無）& \% & 1（有）& \% \\
+\midrule
+問號 & 638 & 83.29 & 128 & 16.71 \\
+圖片（0/1）& 546 & 71.28 & 220 & 28.72 \\
+URL（0/1）& 231 & 30.16 & 535 & 69.84 \\
+@提及（0/1）& 705 & 92.04 & 61 & 7.96 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{重點觀察}
+
+\begin{itemize}
+    \item \textbf{互動量分布：}log 轉換後仍右偏（偏態 1.001）；原始互動量極度右偏（偏態 7.67、最大值 2{,}474），故採 log 轉換。
+    \item \textbf{文字長度：}平均 23.5 字（標準差 12.3），近似對稱（偏態 0.24）。
+    \item \textbf{問號：}16.7\% 之貼文含至少一個「?」。
+    \item \textbf{Hashtag／Emoji：}皆稀疏（平均 $<0.5$），絕大多數貼文不使用。
+    \item \textbf{控制變數：}28.7\% 之貼文含圖片，69.8\% 含 URL，8.0\% 含 @提及。
+\end{itemize}
+
+\newpage
+
+\section{相關分析}
+
+\subsection{Pearson 相關矩陣}
+
+\begin{table}[H]
+\centering
+\caption{Pearson 相關矩陣（下三角；$N=766$）}
+\label{tab:corr_full}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
+\midrule
+(1) $\ln(1+\text{Eng.})$ & 1 & & & & & & & & \\
+(2) 文字長度 & $-0.184^{***}$ & 1 & & & & & & & \\
+(3) 問號 & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
+(4) 情緒效價 & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
+(5) Hashtag 數 & $0.452^{***}$ & $-0.012$ & $0.075^{*}$ & $0.047$ & 1 & & & & \\
+(6) Emoji 數 & $0.411^{***}$ & $-0.044$ & $0.206^{***}$ & $0.257^{***}$ & $0.087^{*}$ & 1 & & & \\
+(7) 圖片（0/1）& $0.481^{***}$ & $-0.042$ & $0.172^{***}$ & $0.346^{***}$ & $0.042$ & $0.439^{***}$ & 1 & & \\
+(8) URL（0/1）& $0.234^{***}$ & $0.035$ & $-0.064$ & $0.129^{***}$ & $0.084^{*}$ & $0.116^{**}$ & $0.417^{***}$ & 1 & \\
+(9) @提及（0/1）& $0.329^{***}$ & $0.016$ & $0.010$ & $0.033$ & $0.495^{***}$ & $0.075^{*}$ & $-0.016$ & $0.067$ & 1 \\
+\bottomrule
+\multicolumn{10}{l}{\small $^{***}\,p<.001$；$^{**}\,p<.01$；$^{*}\,p<.05$（雙尾）。} \\
+\end{tabular}
+\end{table}
+
+\subsection{重點相關發現}
+
+\begin{itemize}
+    \item \textbf{文字長度負向關聯：}$r=-0.184$，$p<.001$，預示 H1 將被否定。
+    \item \textbf{最強的互動正相關：}圖片虛擬變數（$r=0.481$）、Hashtag 數（$r=0.452$）、Emoji 數（$r=0.411$）。
+    \item \textbf{Hashtag 與 @提及虛擬變數：}$r=0.495$，為非對角線最大值；但兩者於迴歸中之 VIF 皆低於 1.4，未構成共線性問題。
+    \item \textbf{所有相關係數 $|r|<0.5$}，與下文 VIF 分析一致。
+\end{itemize}
+
+\newpage
+
+\section{迴歸分析}
+
+\subsection{估計方法}
+
+模型以普通最小平方法（OLS）估計，並透過 \texttt{statsmodels.ols(\ldots).fit(cov\_type="HC1")} 套用 HC1 異質變異數穩健標準誤。Breusch--Pagan 檢定（§\ref{sec:diag}）顯示存在顯著異質變異數，故全程採用 HC1 推論；點估計與一般 OLS 相同，僅標準誤、$t$ 值與 $p$ 值有別。
+
+\subsection{模型診斷}
+\label{sec:diag}
+
+\subsubsection{異質變異數（Breusch--Pagan）}
+\begin{itemize}
+    \item Lagrange Multiplier 統計量：90.22；$p<.0001$。
+    \item F 統計量：12.63；$p<.0001$。
+    \item \textbf{結論：}存在顯著異質變異數，採 HC1 穩健標準誤合適。
+\end{itemize}
+
+\subsubsection{殘差常態性（Shapiro--Wilk）}
+\begin{itemize}
+    \item $W = 0.9680$；$p<.0001$。
+    \item \textbf{結論：}殘差略偏離常態；惟 $N=766$ 已可仰賴 OLS 之漸近性質。
+\end{itemize}
+
+\subsubsection{多元共線性（VIF）}
+
+\begin{table}[H]
+\centering
+\caption{變異數膨脹因子（VIF）}
+\small
+\begin{tabular}{lr}
+\toprule
+變數 & VIF \\
+\midrule
+文字長度 & 1.077 \\
+問號 & 1.119 \\
+情緒效價 & 1.197 \\
+Hashtag 數 & 1.341 \\
+Emoji 數 & 1.303 \\
+圖片（0/1）& 1.639 \\
+URL（0/1）& 1.259 \\
+@提及（0/1）& 1.338 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+所有 VIF 皆低於 2.0，遠低於 10 之常見門檻，無共線性疑慮。
+
+\subsection{主迴歸結果}
+
+\begin{table}[H]
+\centering
+\caption{穩健 OLS 預測 $\ln(1+\text{Engagement})$ 之結果（$N=766$）}
+\label{tab:regression_main}
+\small
+\begin{tabular}{lcccc}
+\toprule
+變數 & 係數 & 穩健 SE & $t$ 值 & $p$ 值 \\
+\midrule
+\multicolumn{5}{l}{\textit{焦點自變數（假說）}} \\
+文字長度（H1）& $-0.0193^{***}$ & 0.0032 & $-5.98$ & $<.0001$ \\
+問號（H2）& $0.4687^{***}$ & 0.1325 & 3.54 & 0.0004 \\
+情緒效價（H3）& $0.0641^{*}$ & 0.0266 & 2.41 & 0.0161 \\
+Hashtag 數（H4）& $1.0623^{***}$ & 0.1276 & 8.33 & $<.0001$ \\
+Emoji 數（H5）& $0.3144^{***}$ & 0.0834 & 3.77 & 0.0002 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{控制變數（v4.0.0：0/1 虛擬變數）}} \\
+圖片（0/1）& $1.1376^{***}$ & 0.1344 & 8.47 & $<.0001$ \\
+URL（0/1）& $0.1461$ & 0.0868 & 1.68 & 0.0923 \\
+@提及（0/1）& $0.8898^{***}$ & 0.2433 & 3.66 & 0.0003 \\
+\addlinespace
+截距 & $1.4882^{***}$ & 0.1069 & 13.92 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{\textit{模型配適}} \\
+觀察值數 & \multicolumn{4}{l}{766} \\
+$R^2$ & \multicolumn{4}{l}{0.5119} \\
+調整後 $R^2$ & \multicolumn{4}{l}{0.5068} \\
+F 統計量 & \multicolumn{4}{l}{$F(8, 757) = 76.681$，$p<.0001$} \\
+\bottomrule
+\multicolumn{5}{l}{\small 註：$^{***}p<.001$、$^{**}p<.01$、$^{*}p<.05$（雙尾）；HC1 穩健標準誤。} \\
+\end{tabular}
+\end{table}
+
+\subsection{假說檢定}
+
+\begin{table}[H]
+\centering
+\caption{假說檢定結果摘要}
+\small
+\begin{tabular}{llcl}
+\toprule
+假說 & 預測方向 & 估計值 & 結論 \\
+\midrule
+H1：文字長度 & $+$ & $-0.019^{***}$ & \textbf{未獲支持} \\
+H2：問號 & $+$ & $+0.469^{***}$ & \textbf{獲支持} \\
+H3：情緒效價 & $+$ & $+0.064^{*}$ & \textbf{獲支持} \\
+H4：Hashtag 數 & $+$ & $+1.062^{***}$ & \textbf{獲支持} \\
+H5：Emoji 數 & $+$ & $+0.314^{***}$ & \textbf{獲支持} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{係數解讀}
+
+下列百分比效果均以 $(e^{\beta}-1)\times 100\%$ 計算，意指其他變數不變下，預測變數每增加一單位（或從 0 變為 1）對 $(1+\text{Engagement})$ 的相對變化。
+
+\subsubsection*{H1：文字長度——未獲支持}
+$\beta_1 = -0.0193$，$p<.001$。每多一個經清理後的字，互動量約下降 $-1.92\%$。在 X 上「短勝於長」。
+
+\subsubsection*{H2：問號——獲支持}
+$\beta_2 = +0.4687$，$p<.001$。含問號之貼文相較不含者，互動量約多出 $+59.8\%$。
+
+\subsubsection*{H3：情緒效價——獲支持}
+$\beta_3 = +0.0641$，$p=.0161$。效價每提升一單位，互動量約增加 $+6.6\%$。
+
+\subsubsection*{H4：Hashtag 數——獲支持}
+$\beta_4 = +1.0623$，$p<.001$。每多一個 hashtag，互動量約增加 $+189\%$。
+
+\subsubsection*{H5：Emoji 數——獲支持}
+$\beta_5 = +0.3144$，$p<.001$。每多一個 emoji，互動量約增加 $+36.9\%$。
+
+\subsubsection*{控制變數}
+圖片虛擬變數（$\beta=+1.14$，$p<.001$，約 $+212\%$）與 @提及虛擬變數（$\beta=+0.89$，$p<.001$，約 $+143\%$）皆呈強烈正向；URL 虛擬變數則小且不顯著（$\beta=+0.15$，$p=.092$）——由於 70\% 的貼文本來就含 URL，「是否附帶連結」的邊際貢獻在納入其他特徵後並不顯著。
+
+\newpage
+
+\section{視覺化診斷}
+
+\subsection{殘差分析}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/residual_histogram.png}
+\caption{殘差分布與常態曲線疊圖}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{../plots/qq_plot.png}
+\caption{殘差 Q-Q 圖}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/resid_vs_fitted.png}
+\caption{殘差對配適值散布圖}
+\end{figure}
+
+\subsection{依問號分組之分布}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{../plots/dist_by_question.png}
+\caption{依問號分組之 $\ln(1+\text{Engagement})$ 分布}
+\end{figure}
+
+\newpage
+
+\section{與 v2.0.0 基準之比較}
+
+\begin{table}[H]
+\centering
+\caption{v2.0.0（計數型 CV）vs.\ v4.0.0（虛擬型 CV），相同 $N=766$}
+\small
+\begin{tabular}{lrrr}
+\toprule
+指標 & v2.0.0 & v4.0.0 & $\Delta$ \\
+\midrule
+$R^2$ & 0.4924 & 0.5119 & $+0.0195$ \\
+調整後 $R^2$ & 0.4871 & 0.5068 & $+0.0197$ \\
+F 統計量 & 63.857 & 76.681 & $+12.82$ \\
+$\beta_1$ 文字長度 & $-0.0211^{***}$ & $-0.0193^{***}$ & $+0.0018$ \\
+$\beta_2$ 問號 & $+0.4793^{***}$ & $+0.4687^{***}$ & $-0.0106$ \\
+$\beta_3$ 情緒效價 & $+0.0840^{**}$ & $+0.0641^{*}$ & $-0.0199$ \\
+$\beta_4$ Hashtag & $+1.0959^{***}$ & $+1.0623^{***}$ & $-0.0336$ \\
+$\beta_5$ Emoji & $+0.3428^{***}$ & $+0.3144^{***}$ & $-0.0284$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+控制變數重新編碼後，$R^2$ 與調整後 $R^2$ 各上升約 2 個百分點，F 統計量提升約 20\%。所有焦點假說的方向與顯著性皆未變動；幅度上有微幅下移，這是預期內的結果（控制變數現以更乾淨的「是否出現」掌握共變，故焦點變數所吸收之變異略減）。控制變數中，圖片與 @提及虛擬變數係數明顯放大（因現為「無」對「有」的對比），URL 虛擬變數則失去顯著性，反映在已納入其他變數後，「是否附帶連結」本身已非主要差異化因子。
+
+\section{管理意涵}
+
+\subsection{給 Booking.com 的建議}
+
+\begin{enumerate}
+    \item \textbf{擁抱簡潔。}每多一字約損失 $-1.9\%$ 互動；建議鎖定 15--25 字。
+    \item \textbf{策略性提問。}含「?」之貼文互動量約多出 $+60\%$。
+    \item \textbf{維持正向情緒語調。}效價每提升一單位增加約 $+6.6\%$ 互動。
+    \item \textbf{使用 hashtag。}每一個 hashtag 約帶來 $+189\%$ 互動，槓桿極高，建議 1--2 個。
+    \item \textbf{使用 emoji。}每一個 emoji 約帶來 $+37\%$ 互動，建議 1--2 個情境相關之表情符號。
+    \item \textbf{務必附圖。}圖片虛擬變數係數對應約三倍以上互動。
+    \item \textbf{適時 @提及。}@提及虛擬變數係數對應約 $+143\%$ 互動，可於合作目的地或飯店時運用。
+\end{enumerate}
+
+\subsection{最佳化貼文範本}
+
+理想之 Booking.com 貼文：精簡（15--20 字）、含問句、語氣正向、使用 1--2 個相關 hashtag、搭配 1--2 個情境化 emoji、附上圖片，並於合適場合 @提及合作夥伴。
+
+\section{研究限制與未來方向}
+
+\begin{itemize}
+    \item \textbf{橫斷面、觀察性資料：}本研究不主張因果，僅論及相關。
+    \item \textbf{平台特定：}結果僅限 X 平台，未必可推至 Instagram、Facebook 或 TikTok。
+    \item \textbf{單一品牌：}推廣至其他旅遊品牌或產業需另行驗證。
+    \item \textbf{合計型互動指標：}like、comment、share 等權合計，未來可分項建模。
+    \item \textbf{時間範圍：}2021--2022 年資料未必反映當下平台動能。
+\end{itemize}
+
+\section{結論}
+
+第 4.0.0 版確認 v2.0.0 之質性結論——簡潔、互動性、正向語調、hashtag 與 emoji 皆與 Booking.com 在 X 上的互動量相關——並透過一項理論動機明確的單一更動（控制變數改為 0/1 虛擬變數），將模型 $R^2$ 由 0.4924 提升至 0.5119。所有 VIF 仍維持在 2.0 以下，並全程採用 HC1 穩健標準誤以兼顧異質變異數下之推論有效性。
+
+\appendix
+\section{技術附錄}
+
+\subsection{軟體與套件}
+\begin{itemize}
+    \item Python 3、pandas、numpy、scipy、statsmodels、matplotlib。
+    \item 分析腳本：\texttt{analysis/python/run\_statistics.py}（v4.0.0）。
+\end{itemize}
+
+\subsection{資料檔案}
+\begin{itemize}
+    \item 輸入：\texttt{data/research\_data.csv}（766 列 $\times$ 38 欄）。
+    \item 輸出：\texttt{results/20260429\_014427/}（本版本）。
+\end{itemize}
+
+\section*{參考文獻}
+\addcontentsline{toc}{section}{參考文獻}
+
+\begin{enumerate}
+    \item De Vries, L., Gensler, S., \& Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
+    \item Gkikas, D.C., Tzafilkou, K., Theodoridis, P.K., Garmpis, A., \& Gkikas, M.C. (2022). How do text characteristics impact user engagement in social media posts? Modeling content readability, length, and hashtags number in Facebook. \textit{International Journal of Information Management Data Insights}, 2, 100067.
+    \item Ko, E.E., Kim, D., \& Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
+    \item Li, Y., \& Xie, Y. (2020). Is a picture worth a thousand words? An empirical study of image content and social media engagement. \textit{Journal of Marketing Research}, 57(1), 1--19.
+    \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M., \& Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
+    \item Moran, G., Muzellec, L., \& Johnson, D. (2019). Message content features and social media engagement: evidence from the media industry. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
+    \item Reddy, M.A.S., \& Prakash, C. (2024). Sentiment analysis of social media networking sites: a comparative study on user engagement and public opinion.
+    \item van der Harst, J.P., \& Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
+\end{enumerate}
+
+\end{document}

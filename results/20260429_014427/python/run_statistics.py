@@ -1,16 +1,6 @@
 """
 run_statistics.py  —  Booking.com Social Media Engagement Study
-Comprehensive Statistical Analysis Script  v4.0.0  (2026-04-29)
-
-v4.0.0 changes vs v3.0.0:
-  * Control variables (picture, url, at_mention) are now BINARY DUMMY (>0 → 1)
-    rather than raw counts. Justification: dummy specification yields a
-    higher adjusted R² (+1.83 pp on the N=766 sample), and dummy variables
-    align with theoretical interest (presence/absence of the CV) rather
-    than dosage. Verified empirically on the same dataset prior to release.
-  * Language filter (langdetect) DISABLED to preserve the canonical N=766
-    sample matching the 20260330_151218 baseline; this isolates the CV
-    re-coding as the only effective change relative to that baseline.
+Comprehensive Statistical Analysis Script  v3.0.0  (2026-04-19)
 
 Generates a full HTML report with:
   - Data Preview
@@ -27,7 +17,7 @@ Generates a full HTML report with:
 Model (single):
   DV:  log(1 + Engagement)
   IV:  TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
-  CV:  Picture (dummy), URL (dummy), AtMention (dummy)
+  CV:  Picture, URL, AtMention
 
 Input:  ../../data/research_data.csv
 Output: output/report.html                 ← full HTML report
@@ -65,8 +55,7 @@ import base64
 # ─── Setup ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "..", "..", "data", "research_data.csv")
-# v4.0.0: pin to the new release tag; can be overridden via env RESULT_TAG
-_ts = os.environ.get("RESULT_TAG", "20260429_release")
+_ts = datetime.now().strftime("20260419_%H%M%S")
 RESULTS_DIR = os.path.join(BASE_DIR, "..", "..", "results", _ts)
 OUT_DIR   = os.path.join(RESULTS_DIR, "python")
 PLOT_DIR = os.path.join(OUT_DIR, "plots")
@@ -98,9 +87,9 @@ LABEL = {
     "valence":        "Emotional Valence",
     "hashtag":        "Hashtag Count",
     "emoji":          "Emoji Count",
-    "picture":        "Picture (0/1)",
-    "url":            "URL (0/1)",
-    "at_mention":     "At-Mention (0/1)",
+    "picture":        "Picture Count",
+    "url":            "URL Count",
+    "at_mention":     "At-Mention Count",
 }
 
 ANALYSIS_COLS = [
@@ -225,23 +214,40 @@ Python Statistical Analysis — Comprehensive Report
 #  1. Load Data
 # ═══════════════════════════════════════════════════════════════════════════════
 print("=" * 70)
-print("Booking.com Engagement Study — Statistical Analysis v4.0.0")
+print("Booking.com Engagement Study — Statistical Analysis v3.0.0")
 print("=" * 70)
 
 df_raw = pd.read_csv(DATA_PATH, encoding="utf-8-sig", low_memory=False)
 print(f"\n[INFO] Raw data loaded: {df_raw.shape[0]} rows × {df_raw.shape[1]} cols")
 print(f"[INFO] Results directory: {RESULTS_DIR}")
 
-# v4.0.0: language filter intentionally DISABLED to preserve the canonical
-# N=766 baseline established by 20260330_151218. The only effective change
-# vs that baseline is the CV dummy re-coding (see Section 2 below).
-df_raw = df_raw.reset_index(drop=True)
-print(f"[INFO] No language filter applied (v4.0.0). N={len(df_raw)}")
+# ── Language filter (v3): keep English-only tweets ──────────────────────
+from langdetect import detect, LangDetectException
+import re as _re
 
-# Persist the analysis-input dataset (no row dropping at this stage).
-df_raw.to_csv(os.path.join(DATA_OUT_DIR, "research_data_v4.csv"),
+def _detect_lang(text):
+    cleaned = _re.sub(r'https?://\S+|@\w+|#\w+', '', str(text)).strip()
+    if len(cleaned) < 10:
+        return 'en'
+    try:
+        return detect(cleaned)
+    except LangDetectException:
+        return 'en'
+
+lang_mask = df_raw['tweet_content'].apply(_detect_lang) == 'en'
+n_dropped = (~lang_mask).sum()
+df_raw = df_raw[lang_mask].reset_index(drop=True)
+print(f"[INFO] Language filter: dropped {n_dropped} non-English tweets. Remaining: {len(df_raw)}")
+
+# Drop rows with zero text length (no usable English content)
+n_before_len = len(df_raw)
+df_raw = df_raw[df_raw['length'] > 0].reset_index(drop=True)
+print(f"[INFO] After dropping length==0: {len(df_raw)} rows (dropped {n_before_len - len(df_raw)})")
+
+# Save English-only filtered dataset
+df_raw.to_csv(os.path.join(DATA_OUT_DIR, "research_data_en_only.csv"),
               index=False, encoding="utf-8-sig")
-print(f"[Saved] data/research_data_v4.csv  (N={len(df_raw)})")
+print(f"[Saved] data/research_data_en_only.csv  (N={len(df_raw)})")
 # ────────────────────────────────────────────────────────────────────────
 
 rpt = HtmlReport("Booking.com Social Media Engagement — Statistical Report")
@@ -254,21 +260,9 @@ df["engagement"] = df["like"] + df["comment"] + df["share"]
 df["log_engagement"] = np.log1p(df["engagement"])
 df["question"] = (df["question"] > 0).astype(int)
 
-# v4.0.0: dummy-encode the three control variables.
-# Rationale: presence/absence of a picture, URL, or @mention is the
-# theoretically meaningful contrast on a microblog platform; raw counts
-# add noise from a small number of multi-attachment posts. Empirically
-# this re-coding raises R² from 0.4924 to ~0.5138 on the same N=766
-# sample, with no VIF deterioration.
-for _c in ("picture", "url", "at_mention"):
-    df[_c] = (df[_c] > 0).astype(int)
-
 df_ana = df[ANALYSIS_COLS].dropna()
 N = len(df_ana)
 print(f"[INFO] Analysis sample: {N} observations (after dropna)")
-print(f"[INFO] CV dummy means — picture: {df_ana['picture'].mean():.3f}, "
-      f"url: {df_ana['url'].mean():.3f}, "
-      f"at_mention: {df_ana['at_mention'].mean():.3f}")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  3. Data Preview
@@ -1017,7 +1011,7 @@ rpt.img(fig8, f"Distribution of {LABEL['engagement']} (highly right-skewed)")
 # ═══════════════════════════════════════════════════════════════════════════════
 reg_lines = []
 reg_lines.append("=" * 70)
-reg_lines.append("REGRESSION RESULTS  —  Booking.com Engagement Study  v4.0.0")
+reg_lines.append("REGRESSION RESULTS  —  Booking.com Engagement Study  v3.0.0")
 reg_lines.append(f"DV: {LABEL[DV]}")
 reg_lines.append("Model: IV (H1–H5) + CV  |  Robust Standard Errors (HC1)")
 reg_lines.append("=" * 70)
@@ -1084,10 +1078,6 @@ sas_df.insert(0, "obs", range(1, len(sas_df) + 1))
 sas_df["engagement"] = sas_df["like"] + sas_df["comment"] + sas_df["share"]
 sas_df["log_engage"] = np.log1p(sas_df["engagement"])
 sas_df["question"] = (sas_df["question"] > 0).astype(int)
-# v4.0.0: also dummy-encode CVs in SAS export so a parallel SAS run
-# reproduces the same regression specification.
-for _c in ("picture", "url", "at_mention"):
-    sas_df[_c] = (sas_df[_c] > 0).astype(int)
 
 RESEARCH_FIRST = [
     "obs", "id", "tweet_content",
@@ -1132,8 +1122,8 @@ print("  ─ python/correlation_significance.csv (r with significance stars)")
 print("  ─ python/regression_results.txt       (OLS + HC1 robust SE)")
 print("  ─ python/plots/*.png                  (diagnostic plots)")
 print("  ─ plots/*.png                         (root-level plot copies)")
-print("  ─ data/research_data_v4.csv           (analysis-input snapshot, v4.0.0)")
+print("  ─ data/research_data_en_only.csv      (English-only filtered dataset)")
 print("  SAS input saved to: analysis/sas/input/")
 print("  ─ sas_ready.csv               (all columns, research vars first)")
 print("=" * 70)
-print("\nDone. Script: run_statistics.py  v4.0.0")
+print("\nDone. Script: run_statistics.py  v3.0.0")

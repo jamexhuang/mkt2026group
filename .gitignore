@@ -28,6 +28,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# Python 虛擬環境
+.venv/
+venv/
+
 # Jupyter Notebook 暫存
 .ipynb_checkpoints/
 
