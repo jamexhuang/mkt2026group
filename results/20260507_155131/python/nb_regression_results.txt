@@ -1,0 +1,48 @@
+======================================================================
+NEGATIVE BINOMIAL ROBUSTNESS CHECK — Booking.com Engagement Study v5.0.0
+DV: engagement (raw count)  |  Model: NB2 with log link
+======================================================================
+
+N = 766
+NB fitting method         = NB2 GLM with α fixed at the MoM estimator α̂_MoM = (Var(Y)−E[Y])/E[Y]² = 20.2098
+Log-likelihood (NB)       = -3474.9724
+Log-likelihood (Poisson)  = -39022.6011
+LR statistic (2·ΔLL)      = 71095.2575
+LR p-value (½·χ²(1))      = <.0001
+Dispersion α (used)       = 20.209826  (>0 ⇒ NB > Poisson)
+  α (Cameron–Trivedi aux) = 8658.699334  (diagnostic only)
+AIC  NB=6967.94   Poisson=78063.20
+BIC  NB=7009.72   Poisson=78104.97
+McFadden pseudo-R²        = 0.0137
+Robust SE (HC1) used?     = Yes
+
+──────────────────────────────────────────────────────────────────────
+NB Coefficient Table
+──────────────────────────────────────────────────────────────────────
+Variable               Hyp         Coeff         SE        z          p       IRR   Sig
+──────────────────────────────────────────────────────────────────────
+Intercept                         1.8878    0.22095     8.54     0.0000    6.6047   ***
+Text Length (words)    H1        -0.0350    0.00583    -6.01     0.0000    0.9656   ***
+Question Mark (0/1)    H2         0.9253    0.31732     2.92     0.0035    2.5226    **
+Emotional Valence      H3         0.0912    0.05541     1.65     0.0998    1.0955      
+Hashtag Count          H4         1.0476    0.17874     5.86     0.0000    2.8507   ***
+Emoji Count            H5         0.3837    0.14135     2.71     0.0066    1.4676    **
+Picture (0/1)                     1.5958    0.27316     5.84     0.0000    4.9321   ***
+URL (0/1)                         0.4956    0.17444     2.84     0.0045    1.6414    **
+At-Mention (0/1)                  1.6970    0.36678     4.63     0.0000    5.4578   ***
+──────────────────────────────────────────────────────────────────────
+
+──────────────────────────────────────────────────────────────────────
+OLS vs NB Hypothesis Decision Concordance
+──────────────────────────────────────────────────────────────────────
+Hyp   Variable               Pred  OLS dir  OLS p      NB dir   NB p       Match     
+──────────────────────────────────────────────────────────────────────
+H1    Text Length (words)    +     −        <.0001     −        <.0001     ✓ match   
+H2    Question Mark (0/1)    +     +        0.0004     +        0.0035     ✓ match   
+H3    Emotional Valence      +     +        0.0161     +        0.0998     ✗ divergent
+H4    Hashtag Count          +     +        <.0001     +        <.0001     ✓ match   
+H5    Emoji Count            +     +        0.0002     +        0.0066     ✓ match   
+──────────────────────────────────────────────────────────────────────
+
+Concordance: 4/5 hypotheses match between OLS (HC1) and NB.
+Note: NB uses log link, so IRR = exp(β). For continuous X, IRR is multiplicative effect on E[Y] per unit; for binary X, IRR is the ratio of E[Y|X=1] / E[Y|X=0].

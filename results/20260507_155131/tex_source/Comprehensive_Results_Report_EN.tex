@@ -1,0 +1,573 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{fontspec}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+\setstretch{1.2}
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{2em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Booking.com Social Media Engagement Study\\
+Complete Results Report with Verification\\[0.5em]
+\large Version 5.0.0 (Negative Binomial Robustness Check Added)\\[0.3em]
+\small Generated: 2026-05-07}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Executive Summary}
+\addcontentsline{toc}{section}{Executive Summary}
+
+This report presents the complete statistical analysis results for the Booking.com social media engagement study (v5.0.0). The primary specification is OLS log-linear regression on $\ln(1+\text{Engagement})$ with HC1 heteroscedasticity-consistent standard errors, identical to the v4.0.0 release. The methodological addition in v5.0.0 is a \textbf{Negative Binomial (NB2) robustness check}: we re-estimate the same eight-predictor model on the raw integer engagement count, evaluate overdispersion via a likelihood-ratio test against Poisson, and compare hypothesis decisions across the two functional forms.
+
+The OLS findings replicate v4.0.0 exactly (same $N=766$, same coefficients, $R^2=0.5119$, $F(8,757)=76.68$). The NB robustness check confirms massive overdispersion ($\hat\alpha=20.21$, LR vs Poisson $\chi^2_{1/2}=71{,}095$, $p<.0001$), and \textbf{four of the five focal hypothesis decisions match between OLS and NB (H1, H2, H4, H5)}. The single divergence is H3 (Emotional Valence): significant under OLS ($p=.016$) but marginal under NB ($p=.100$). The Picture, At-Mention, and Hashtag effects are stable and large in both specifications. We present the divergence on H3 transparently rather than choosing one model post hoc.
+
+The NB model uses a fixed-$\alpha$ GLM specification with $\hat\alpha$ derived from a method-of-moments estimator $\hat\alpha_{\text{MoM}}=(s^2(Y)-\bar Y)/\bar Y^2$. We also report the Cameron--Trivedi auxiliary-regression $\hat\alpha_{\text{CT}}$ for diagnostic comparison; full joint NB MLE on this dataset is poorly identified because the marginal variance ($\approx 11{,}385$) so dominates the marginal mean ($\approx 13.4$) that the likelihood is nearly flat in $\alpha$. The MoM-based GLM is the textbook stable choice in this regime.
+
+\section{Research Framework}
+
+\subsection{Research Question}
+\textbf{How do textual features in Booking.com's posts on X influence social media engagement?}
+
+\subsection{Hypotheses}
+
+The study tests five focal hypotheses concerning textual content:
+
+\begin{enumerate}[label=H\arabic*.]
+    \item Text length is positively associated with social media engagement.
+    \item Question marks are positively associated with social media engagement.
+    \item Emotional valence is positively associated with social media engagement.
+    \item The number of hashtags is positively associated with social media engagement.
+    \item Emoji usage is positively associated with social media engagement.
+\end{enumerate}
+
+\subsection{Model Specification}
+
+We estimate two specifications on the same predictor set. The primary specification is OLS log-linear:
+
+\begin{equation}
+\begin{aligned}
+\ln(1 + \text{Engagement}_i) = {}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{PictureD}_i + \beta_7\text{URLD}_i \\
+& + \beta_8\text{AtMentionD}_i + \varepsilon_i.
+\end{aligned}
+\end{equation}
+
+The Negative Binomial (NB2) robustness specification fits the same right-hand side on the raw integer count via a log link:
+
+\begin{equation}
+\ln(\mathbb{E}[\text{Engagement}_i \mid X_i]) = \alpha_0 + \sum_{k=1}^{8}\alpha_k X_{ki},\qquad \text{Engagement}_i \sim \text{NB}(\mu_i, \theta).
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$
+    \item For OLS, the dependent variable is the natural log of one plus engagement, $\ln(1 + \text{Engagement}_i)$ (computed via \texttt{numpy.log1p}). For NB, the dependent variable is the raw count.
+    \item Independent variables (focal): TextLength (H1), Question (H2), Valence (H3), Hashtag (H4), Emoji (H5)
+    \item Control variables (binary dummies, identical to v4.0.0): PictureD = $\mathbb{1}[\text{picture count}>0]$, URLD = $\mathbb{1}[\text{url count}>0]$, AtMentionD = $\mathbb{1}[\text{@mention count}>0]$
+\end{itemize}
+
+\paragraph{Coefficient interpretation.} For the OLS specification, a one-unit increase in $X_k$ produces an approximately $(e^{\beta_k}-1)\times 100\%$ change in $(1+\text{Engagement})$, holding others constant. For the NB specification with log link, $\text{IRR}_k = \exp(\alpha_k)$ is the multiplicative effect on the expected count: for continuous $X_k$, IRR is the proportional change in $\mathbb{E}[Y]$ per unit; for binary $X_k$, IRR is the ratio $\mathbb{E}[Y\mid X=1]/\mathbb{E}[Y\mid X=0]$. Both interpretations are reported below.
+
+\section{Data Description}
+
+\subsection{Dataset Characteristics}
+
+\begin{itemize}
+    \item \textbf{Sample Size:} $N = 766$ original posts from Booking.com's official X account.
+    \item \textbf{Time Period:} November 1, 2021 to November 21, 2022.
+    \item \textbf{Data Source:} \texttt{data/research\_data.csv} (publicly available curated dataset).
+    \item \textbf{Variables:} 38 columns including raw engagement counts, textual features, and post-level attachments.
+    \item \textbf{Filtering:} Replies, retweets and video posts were removed prior to release of the dataset; no further row-level filtering is applied so that $N=766$ matches the v2.0.0 / v4.0.0 baseline.
+    \item \textbf{Engagement distribution (raw count):} mean $=13.39$, variance $=11{,}385$, max $=2{,}474$, zeros $=104/766\;(13.6\%)$. The variance--to--mean ratio of $\approx 850$ implies extreme overdispersion and motivates the NB robustness check below.
+\end{itemize}
+
+\subsection{Variable Definitions}
+
+\begin{table}[H]
+\centering
+\caption{Variable Definitions and Operationalisation}
+\small
+\begin{tabular}{@{}p{0.20\textwidth} p{0.16\textwidth} p{0.56\textwidth}@{}}
+\toprule
+Construct & Role & Operational Definition \\
+\midrule
+Social Media Engagement & Dependent Variable & $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$. Used as $\ln(1+\text{Engagement}_i)$ in OLS and as the raw count in NB. \\
+\midrule
+Text Length & Main IV (H1) & Number of tokens in the final cleaned text after a six-stage pipeline (URL, mention, hashtag, punctuation, digit, stop-word removal). \\
+Question Mark & Main IV (H2) & Binary dummy: 1 if the raw post contains at least one ``?''; else 0. \\
+Emotional Valence & Main IV (H3) & Lexicon-based sentiment score: tokens matched against a 1--9 valence lexicon (Warriner-style ANEW extension), averaged and centred by subtracting 4.5. \\
+Hashtag Count & Main IV (H4) & Number of \texttt{\#tag} tokens in the raw post. \\
+Emoji Count & Main IV (H5) & Number of emoji code-points in the raw post. \\
+\midrule
+Picture (0/1) & Control & 1 if the post has at least one image; else 0. \\
+URL (0/1) & Control & 1 if the post contains at least one URL; else 0. \\
+At-Mention (0/1) & Control & 1 if the post contains at least one @mention; else 0. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Why dummy controls?} Empirically, more than 96\% of posts have either zero or one image, and the URL and @mention distributions are similarly bimodal at $\{0, 1\}$. Theoretically, the meaningful contrast for content strategy is whether the attachment is present at all rather than how many of each are stacked.
+
+\subsection{Text Preprocessing Pipeline}
+\label{sec:preproc}
+
+The raw tweet text (\texttt{tweet\_content}) is passed through six sequential cleaning stages (\texttt{text\_clean1}--\texttt{text\_clean6}) before \texttt{length}, \texttt{valence} and the n-gram features are computed:
+
+\begin{enumerate}
+    \item \texttt{text\_clean1}: Strip URLs, @mentions, \#hashtags and markup artefacts.
+    \item \texttt{text\_clean2}: Remove exclamation marks; the \texttt{exclamation} count is extracted in this pass.
+    \item \texttt{text\_clean3}: Lower-case normalisation.
+    \item \texttt{text\_clean4}: Remove residual punctuation and digits.
+    \item \texttt{text\_clean5}: Remove English stop-words.
+    \item \texttt{text\_clean6}: Final cleaned text used for feature extraction.
+\end{enumerate}
+
+\newpage
+
+\section{Descriptive Statistics}
+
+\subsection{Summary Statistics}
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics ($N=766$)}
+\label{tab:desc_full}
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Variable & Mean & SD & Min & Q1 & Median & Q3 & Max & Skew \\
+\midrule
+$\ln(1+\text{Eng.})$ & 1.942 & 1.572 & 0.000 & 0.693 & 1.609 & 2.996 & 7.814 & 1.001 \\
+Engagement (raw) & 13.39 & 106.7 & 0 & 1 & 4 & 19 & 2{,}474 & 7.67 \\
+Text Length (words) & 23.453 & 12.257 & 0.000 & 14.000 & 22.000 & 33.000 & 53.000 & 0.239 \\
+Question Mark (0/1) & 0.167 & 0.373 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 1.785 \\
+Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 0.000 & 2.046 & 3.948 & 0.371 \\
+Hashtag Count & 0.145 & 0.489 & 0.000 & 0.000 & 0.000 & 0.000 & 3.000 & 3.817 \\
+Emoji Count & 0.398 & 0.884 & 0.000 & 0.000 & 0.000 & 1.000 & 13.000 & 5.261 \\
+Picture (0/1) & 0.287 & 0.453 & 0.000 & 0.000 & 0.000 & 1.000 & 1.000 & 0.941 \\
+URL (0/1) & 0.698 & 0.459 & 0.000 & 0.000 & 1.000 & 1.000 & 1.000 & $-0.865$ \\
+At-Mention (0/1) & 0.080 & 0.271 & 0.000 & 0.000 & 0.000 & 0.000 & 1.000 & 3.105 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Engagement Overdispersion Profile}
+
+For the NB robustness check, the relevant marginal-distribution statistics on raw \texttt{engagement} are: $\bar Y=13.39$, $s^2(Y)=11{,}385$, variance-to-mean ratio $\approx 850$, and zero proportion $=13.6\%$. The method-of-moments estimator yields $\hat\alpha_{\text{MoM}}=(s^2-\bar Y)/\bar Y^2 = 20.21$, which we use to anchor the NB GLM (see §\ref{sec:nb}).
+
+\subsection{Frequency Distribution of Binary Variables}
+
+\begin{table}[H]
+\centering
+\caption{Frequencies of the Four Binary Indicators ($N=766$)}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Indicator & 0 (No) & \% & 1 (Yes) & \% \\
+\midrule
+Question Mark & 638 & 83.29 & 128 & 16.71 \\
+Picture (0/1) & 546 & 71.28 & 220 & 28.72 \\
+URL (0/1) & 231 & 30.16 & 535 & 69.84 \\
+At-Mention (0/1) & 705 & 92.04 & 61 & 7.96 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Correlation Analysis}
+
+\subsection{Pearson Correlation Matrix}
+
+\begin{table}[H]
+\centering
+\caption{Pearson Correlation Matrix (Lower Triangle, $N=766$)}
+\label{tab:corr_full}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\
+\midrule
+(1) $\ln(1+\text{Eng.})$ & 1 & & & & & & & & \\
+(2) Text Length & $-0.184^{***}$ & 1 & & & & & & & \\
+(3) Question Mk. & $0.262^{***}$ & $-0.191^{***}$ & 1 & & & & & & \\
+(4) Emot. Valence & $0.234^{***}$ & $0.150^{***}$ & $0.089^{*}$ & 1 & & & & & \\
+(5) Hashtag Ct. & $0.452^{***}$ & $-0.012$ & $0.075^{*}$ & $0.047$ & 1 & & & & \\
+(6) Emoji Ct. & $0.411^{***}$ & $-0.044$ & $0.206^{***}$ & $0.257^{***}$ & $0.087^{*}$ & 1 & & & \\
+(7) Picture (0/1) & $0.481^{***}$ & $-0.042$ & $0.172^{***}$ & $0.346^{***}$ & $0.042$ & $0.439^{***}$ & 1 & & \\
+(8) URL (0/1) & $0.234^{***}$ & $0.035$ & $-0.064$ & $0.129^{***}$ & $0.084^{*}$ & $0.116^{**}$ & $0.417^{***}$ & 1 & \\
+(9) At-Mention (0/1) & $0.329^{***}$ & $0.016$ & $0.010$ & $0.033$ & $0.495^{***}$ & $0.075^{*}$ & $-0.016$ & $0.067$ & 1 \\
+\bottomrule
+\multicolumn{10}{l}{\small $^{***}\,p<.001$;\; $^{**}\,p<.01$;\; $^{*}\,p<.05$ (two-tailed).} \\
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Regression Analysis: Primary OLS}
+
+\subsection{Estimation Method}
+
+The model is estimated by Ordinary Least Squares with heteroscedasticity-consistent HC1 standard errors via \texttt{statsmodels.ols(\ldots).fit(cov\_type="HC1")}. HC1 is used throughout because the Breusch--Pagan test (§\ref{sec:diag}) flags significant heteroscedasticity. Point estimates are identical to classical OLS; only the standard errors and resulting $t$- and $p$-values differ.
+
+\subsection{Model Diagnostics}
+\label{sec:diag}
+
+\subsubsection{Heteroscedasticity (Breusch--Pagan)}
+\begin{itemize}
+    \item Lagrange Multiplier (LM) statistic: 90.22; $p<.0001$.
+    \item F-statistic: 12.63; $p<.0001$.
+    \item \textbf{Conclusion:} significant heteroscedasticity; HC1 robust standard errors are appropriate.
+\end{itemize}
+
+\subsubsection{Residual Normality (Shapiro--Wilk)}
+\begin{itemize}
+    \item $W = 0.9680$; $p<.0001$.
+    \item \textbf{Conclusion:} residuals deviate from strict normality, but with $N=766$ asymptotic OLS inference is reliable under the central-limit theorem.
+\end{itemize}
+
+\subsubsection{Multicollinearity (VIF)}
+
+\begin{table}[H]
+\centering
+\caption{Variance Inflation Factors}
+\small
+\begin{tabular}{lr}
+\toprule
+Variable & VIF \\
+\midrule
+Text Length & 1.077 \\
+Question Mark & 1.119 \\
+Emotional Valence & 1.197 \\
+Hashtag Count & 1.341 \\
+Emoji Count & 1.303 \\
+Picture (0/1) & 1.639 \\
+URL (0/1) & 1.259 \\
+At-Mention (0/1) & 1.338 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All VIFs are below 2.0, well under the conventional threshold of 10.
+
+\subsection{Main OLS Results (HC1 Robust SE)}
+
+\begin{table}[H]
+\centering
+\caption{Robust OLS Regression Predicting $\ln(1+\text{Engagement})$ ($N=766$)}
+\label{tab:regression_main}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variable & Coefficient & Robust SE & $t$-value & $p$-value \\
+\midrule
+\multicolumn{5}{l}{\textit{Main Independent Variables (Hypotheses)}} \\
+Text Length (H1) & $-0.0193^{***}$ & 0.0032 & $-5.98$ & $<.0001$ \\
+Question Mark (H2) & $0.4687^{***}$ & 0.1325 & 3.54 & 0.0004 \\
+Emotional Valence (H3) & $0.0641^{*}$ & 0.0266 & 2.41 & 0.0161 \\
+Hashtag Count (H4) & $1.0623^{***}$ & 0.1276 & 8.33 & $<.0001$ \\
+Emoji Count (H5) & $0.3144^{***}$ & 0.0834 & 3.77 & 0.0002 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Control Variables (binary dummies)}} \\
+Picture (0/1) & $1.1376^{***}$ & 0.1344 & 8.47 & $<.0001$ \\
+URL (0/1) & $0.1461$ & 0.0868 & 1.68 & 0.0923 \\
+At-Mention (0/1) & $0.8898^{***}$ & 0.2433 & 3.66 & 0.0003 \\
+\addlinespace
+Intercept & $1.4882^{***}$ & 0.1069 & 13.92 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Model Fit}} \\
+Observations & \multicolumn{4}{l}{766} \\
+$R^2$ & \multicolumn{4}{l}{0.5119} \\
+Adjusted $R^2$ & \multicolumn{4}{l}{0.5068} \\
+F-statistic & \multicolumn{4}{l}{$F(8, 757) = 76.681$, $p<.0001$} \\
+\bottomrule
+\multicolumn{5}{l}{\small Notes: $^{***}p<.001$, $^{**}p<.01$, $^{*}p<.05$ (two-tailed).} \\
+\multicolumn{5}{l}{\small Robust standard errors (HC1) used throughout.} \\
+\end{tabular}
+\end{table}
+
+\subsection{OLS Hypothesis Testing}
+
+\begin{table}[H]
+\centering
+\caption{Summary of OLS Hypothesis Test Results}
+\small
+\begin{tabular}{llcl}
+\toprule
+Hypothesis & Predicted & Estimate & Decision \\
+\midrule
+H1: Text Length & $+$ & $-0.019^{***}$ & \textbf{Not supported} \\
+H2: Question Mark & $+$ & $+0.469^{***}$ & \textbf{Supported} \\
+H3: Emotional Valence & $+$ & $+0.064^{*}$ & \textbf{Supported} \\
+H4: Hashtag Count & $+$ & $+1.062^{***}$ & \textbf{Supported} \\
+H5: Emoji Count & $+$ & $+0.314^{***}$ & \textbf{Supported} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{OLS Coefficient Interpretation}
+
+All percentage effects below use $(e^{\beta}-1)\times 100\%$ and refer to the change in $(1+\text{Engagement})$ per unit change in the predictor, holding the others constant.
+
+\subsubsection*{H1: Text Length --- Not Supported}
+$\beta_1 = -0.0193$, $p<.001$. Each additional cleaned word is associated with about $-1.92\%$ engagement.
+
+\subsubsection*{H2: Question Mark --- Supported}
+$\beta_2 = +0.4687$, $p<.001$. Posts with at least one question mark are associated with roughly $+59.8\%$ engagement.
+
+\subsubsection*{H3: Emotional Valence --- Supported}
+$\beta_3 = +0.0641$, $p=.0161$. A one-unit shift toward more positive valence is associated with about $+6.6\%$ engagement.
+
+\subsubsection*{H4: Hashtag Count --- Supported}
+$\beta_4 = +1.0623$, $p<.001$. Each additional hashtag is associated with about $+189\%$ engagement.
+
+\subsubsection*{H5: Emoji Count --- Supported}
+$\beta_5 = +0.3144$, $p<.001$. Each additional emoji is associated with about $+36.9\%$ engagement.
+
+\newpage
+
+\section{Negative Binomial Robustness Check (v5.0.0)}
+\label{sec:nb}
+
+\subsection{Motivation}
+
+The OLS log-linear model treats $\ln(1+Y)$ as continuous and stabilises the variance via the log transform; it is the standard analytic choice in the brand-page literature on engagement. Engagement is, however, a non-negative integer count with extreme overdispersion ($s^2/\bar Y\approx 850$), and the log transform plus the additive $+1$ offset can in principle distort small-count posts. As a robustness check, we therefore re-estimate the same eight-predictor specification as a Negative Binomial (NB2) regression on the raw integer count, with a log link, and compare hypothesis decisions across the two functional forms.
+
+\subsection{NB Estimation Procedure}
+
+The NB2 dispersion parameter $\alpha$ is fixed via a method-of-moments estimator
+\begin{equation}
+\hat\alpha_{\text{MoM}} = \frac{s^2(Y)-\bar Y}{\bar Y^{\,2}} = \frac{11{,}385.4-13.39}{13.39^{2}} = 20.21,
+\end{equation}
+and the NB2 GLM is then fit via iteratively reweighted least squares with HC1 robust standard errors. We also computed the Cameron--Trivedi (1990) auxiliary-regression estimator $\hat\alpha_{\text{CT}}=8{,}658.7$, which is reported here for diagnostic comparison only; in this dataset it is inflated by a single extreme observation (max $=2{,}474$), and on inspection of the overall NB likelihood surface the joint-MLE $\alpha$ is poorly identified (the surface is nearly flat in $\alpha$ when $s^2/\bar Y$ is in the hundreds). We therefore use the marginal MoM estimator as the primary anchor; the GLM with $\hat\alpha_{\text{MoM}}=20.21$ is well-conditioned, gives a substantial fit improvement over Poisson, and yields stable coefficient estimates.
+
+\subsection{NB Coefficient Estimates}
+
+\begin{table}[H]
+\centering
+\caption{Negative Binomial (NB2) Regression on Raw \texttt{engagement} ($N=766$, HC1 robust SE)}
+\label{tab:nb_main}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Variable & Coefficient & Robust SE & $z$ & $p$-value & IRR & 95\% CI on IRR \\
+\midrule
+\multicolumn{7}{l}{\textit{Main Independent Variables (Hypotheses)}} \\
+Text Length (H1) & $-0.0350^{***}$ & 0.0058 & $-6.01$ & $<.0001$ & 0.966 & $[0.954,\;0.977]$ \\
+Question Mark (H2) & $0.9253^{**}$ & 0.3173 & 2.92 & 0.0035 & 2.523 & $[1.354,\;4.701]$ \\
+Emotional Valence (H3) & $0.0912$ & 0.0554 & 1.65 & 0.0998 & 1.096 & $[0.983,\;1.221]$ \\
+Hashtag Count (H4) & $1.0476^{***}$ & 0.1787 & 5.86 & $<.0001$ & 2.851 & $[2.007,\;4.050]$ \\
+Emoji Count (H5) & $0.3837^{**}$ & 0.1414 & 2.71 & 0.0066 & 1.468 & $[1.113,\;1.937]$ \\
+\addlinespace
+\multicolumn{7}{l}{\textit{Control Variables (binary dummies)}} \\
+Picture (0/1) & $1.5958^{***}$ & 0.2732 & 5.84 & $<.0001$ & 4.932 & $[2.886,\;8.428]$ \\
+URL (0/1) & $0.4956^{**}$ & 0.1744 & 2.84 & 0.0045 & 1.641 & $[1.166,\;2.310]$ \\
+At-Mention (0/1) & $1.6970^{***}$ & 0.3668 & 4.63 & $<.0001$ & 5.458 & $[2.660,\;11.196]$ \\
+\addlinespace
+Intercept & $1.8878^{***}$ & 0.2210 & 8.54 & $<.0001$ & 6.605 & $[4.281,\;10.190]$ \\
+\bottomrule
+\multicolumn{7}{l}{\small Dispersion $\hat\alpha = 20.21$ (MoM-anchored, fixed in GLM); HC1 robust SE.} \\
+\multicolumn{7}{l}{\small $^{***}p<.001$, $^{**}p<.01$, $^{*}p<.05$ (two-tailed).} \\
+\end{tabular}
+\end{table}
+
+\subsection{NB Model Fit and Overdispersion Test}
+
+\begin{table}[H]
+\centering
+\caption{NB Model Fit, AIC/BIC, and LR Test against Poisson}
+\small
+\begin{tabular}{lr}
+\toprule
+Statistic & Value \\
+\midrule
+$N$ & 766 \\
+NB log-likelihood & $-3{,}474.97$ \\
+Poisson log-likelihood & $-39{,}022.60$ \\
+LR statistic ($2\cdot\Delta\text{LL}$) & $71{,}095.26$ \\
+LR $p$-value (boundary $\tfrac12\chi^2_1$) & $<.0001$ \\
+Dispersion $\hat\alpha$ (MoM, used) & $20.21$ \\
+$\hat\alpha$ (Cameron--Trivedi, diagnostic) & $8{,}658.70$ \\
+AIC (NB, likelihood-based) & $6{,}967.94$ \\
+BIC (NB, likelihood-based) & $7{,}009.72$ \\
+AIC (Poisson, likelihood-based) & $78{,}063.20$ \\
+BIC (Poisson, likelihood-based) & $78{,}104.97$ \\
+McFadden pseudo-$R^{2}$ & 0.0137 \\
+HC1 robust SE used? & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LR test rejects the Poisson restriction with overwhelming margin ($\chi^2 = 71{,}095$, $p<.0001$ on the boundary $\tfrac12 \chi^2_1$), confirming that the data are massively overdispersed and that NB is the appropriate count-model benchmark. The McFadden pseudo-$R^2$ of $0.014$ is small in absolute terms but is not directly comparable to the OLS $R^2$ on $\ln(1+Y)$; pseudo-$R^2$ values for NB on heavy-tailed counts are typically in the single-digit-percent range and the LR / AIC comparison against Poisson is the more informative benchmark.
+
+\subsection{OLS vs NB Hypothesis Concordance}
+
+\begin{table}[H]
+\centering
+\caption{Hypothesis Decisions Across OLS (HC1) and NB (HC1)}
+\label{tab:concord}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Hypothesis & Predicted & OLS $\beta$ ($p$) & OLS decision & NB $\beta$ ($p$) & NB decision & Match? \\
+\midrule
+H1: Text Length & $+$ & $-0.019$ ($<.001$) & Not supported & $-0.035$ ($<.001$) & Not supported & \checkmark \\
+H2: Question Mark & $+$ & $+0.469$ ($<.001$) & Supported & $+0.925$ ($.004$) & Supported & \checkmark \\
+H3: Valence & $+$ & $+0.064$ ($.016$) & Supported & $+0.091$ ($.100$) & Marginal & {\textbf{?}} \\
+H4: Hashtag Count & $+$ & $+1.062$ ($<.001$) & Supported & $+1.048$ ($<.001$) & Supported & \checkmark \\
+H5: Emoji Count & $+$ & $+0.314$ ($<.001$) & Supported & $+0.384$ ($.007$) & Supported & \checkmark \\
+\bottomrule
+\multicolumn{7}{l}{\small ``Match?'' is \checkmark\ when both models agree on sign and on conventional ($p<.05$) significance.} \\
+\multicolumn{7}{l}{\small \textbf{Concordance: 4/5} hypothesis decisions match between OLS and NB.} \\
+\end{tabular}
+\end{table}
+
+\subsection{Discussion of the H3 Divergence}
+
+H1, H2, H4, H5, and the focal control effects (Picture, At-Mention) are stable in both models: signs match, magnitudes are of the same order, and significance levels remain at conventional thresholds. The single divergence is H3 (Emotional Valence): under OLS the coefficient is positive and significant at the 5\% level ($\beta=+0.064$, $p=.016$), while under NB the coefficient is also positive but its $p$-value is $.100$, just outside conventional significance. Three observations support a calibrated reading rather than a hard reversal:
+
+\begin{enumerate}
+    \item The \textbf{sign is the same in both models}; what changes is the precision under the NB likelihood, which is more sensitive to the long right tail of the engagement distribution.
+    \item In NB, the IRR for valence is $1.10$ with 95\% CI $[0.98,\;1.22]$, which excludes only by a thin margin. The CI is informative rather than null.
+    \item The OLS--NB divergence on H3 is consistent with the small zero-order correlation between valence and the raw count: the lexicon-based valence measure carries weak signal once the strong post-level controls (Picture, Hashtag, Emoji) are partialled out under the heavier-tailed NB likelihood.
+\end{enumerate}
+
+We therefore retain H3 as ``supported under OLS, marginal under NB'' rather than declaring support unconditionally; this is the calibrated conclusion the robustness check was designed to produce.
+
+\subsection{NB Diagnostic Plot}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/nb_pearson_residuals.png}
+\caption{NB Pearson Residuals vs Fitted Mean $\hat\mu$ (orange dotted lines mark $\pm 2$). Residuals are centred on zero with a stable spread across the bulk of the fitted range; a small number of high-fitted observations sit outside $\pm 2$, consistent with the heavy-tailed character of the engagement distribution and not driving the focal coefficients.}
+\end{figure}
+
+\newpage
+
+\section{Visual Diagnostics for OLS}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/residual_histogram.png}
+\caption{Distribution of OLS Residuals with Normal Curve Overlay}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{../plots/qq_plot.png}
+\caption{Q-Q Plot of OLS Residuals}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{../plots/resid_vs_fitted.png}
+\caption{OLS Residuals vs Fitted Values}
+\end{figure}
+
+\newpage
+
+\section{Comparison Against the v4.0.0 Baseline}
+
+\begin{table}[H]
+\centering
+\caption{v4.0.0 (OLS only) vs v5.0.0 (OLS + NB Robustness Check)}
+\small
+\begin{tabular}{lll}
+\toprule
+Aspect & v4.0.0 & v5.0.0 \\
+\midrule
+Primary model & OLS log-linear & OLS log-linear (unchanged) \\
+Robustness model & --- & NB2 GLM with HC1 robust SE (new) \\
+Sample size & $N=766$ & $N=766$ (unchanged) \\
+OLS $R^2$ & 0.5119 & 0.5119 (replicated exactly) \\
+OLS $F(8,757)$ & 76.68 & 76.68 (replicated exactly) \\
+NB dispersion $\hat\alpha$ & --- & 20.21 (MoM-anchored) \\
+LR (NB vs Poisson) & --- & $\chi^2 = 71{,}095$, $p<.0001$ \\
+Hypothesis decisions & 4/5 supported (H1 not) & 4/5 OLS--NB concordant; H3 marginal under NB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Managerial Implications}
+
+\subsection{Key Recommendations for Booking.com}
+
+\begin{enumerate}
+    \item \textbf{Embrace brevity.} Each extra word costs roughly $-1.9\%$ engagement under OLS and corresponds to an IRR of $0.97$ under NB.
+    \item \textbf{Use questions strategically.} The OLS effect is $\sim+60\%$; the NB IRR is $2.52$ (more than doubling the expected count).
+    \item \textbf{Maintain a positive emotional tone.} Significant under OLS ($+6.6\%$) but only marginal under NB (IRR $\approx 1.10$, $p=.10$); use as a soft, secondary lever.
+    \item \textbf{Use hashtags.} OLS $\sim+189\%$ and NB IRR $=2.85$ both support strong, robust effect.
+    \item \textbf{Use emoji.} OLS $\sim+37\%$ and NB IRR $=1.47$ both support a meaningful effect.
+    \item \textbf{Always include an image.} Picture dummy is the largest single effect in both models (OLS $\sim +212\%$, NB IRR $=4.93$).
+    \item \textbf{Tag relevant partners.} At-Mention dummy is large in both (OLS $\sim+143\%$, NB IRR $=5.46$).
+\end{enumerate}
+
+\section{Limitations and Future Research}
+
+\begin{itemize}
+    \item \textbf{Cross-sectional, observational data:} no causal claims are made.
+    \item \textbf{Platform specificity:} findings are X-specific.
+    \item \textbf{Single brand:} generalisability requires replication.
+    \item \textbf{Composite engagement:} likes, comments and shares are summed with equal weights.
+    \item \textbf{NB dispersion identification:} on heavy-tailed counts the joint NB likelihood is poorly identified in $\alpha$; we used a method-of-moments anchor that is robust but does not propagate uncertainty in $\alpha$ into the coefficient SEs.
+    \item \textbf{Zero-inflated and hurdle models:} the analytical sample has 13.6\% zeros, well within standard NB's regime, so we did not estimate ZINB or hurdle models. Future replications on a higher-zero-rate sample could add this layer of robustness.
+\end{itemize}
+
+\section{Conclusion}
+
+This v5.0.0 analysis confirms the substantive findings of the v4.0.0 baseline---brevity, questions, hashtags, emoji, and the picture / at-mention dummies each shape engagement on Booking.com's X account---and adds an explicit NB count-model robustness check on the raw engagement integer. Four of the five focal hypothesis decisions (H1, H2, H4, H5) are concordant across OLS and NB at conventional significance levels, with magnitudes of the same order in both models. The single divergence is H3 (Emotional Valence): supported under OLS at $p=.016$, marginal under NB at $p=.100$, with the same positive sign and an IRR 95\% CI just touching unity. We report this honestly. The Negative Binomial check materially strengthens the inferential basis of the headline findings while exposing a calibrated qualifier on H3.
+
+\appendix
+\section{Technical Appendix}
+
+\subsection{Software and Packages}
+\begin{itemize}
+    \item Python 3, pandas, numpy, scipy, statsmodels, matplotlib.
+    \item Analysis script: \texttt{analysis/python/run\_statistics.py} (v5.0.0).
+\end{itemize}
+
+\subsection{Data Files}
+\begin{itemize}
+    \item Input: \texttt{data/research\_data.csv} (766 rows $\times$ 38 columns).
+    \item Outputs: \texttt{results/20260507\_155131/} (this version).
+\end{itemize}
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}
+    \item Cameron, A.C., \& Trivedi, P.K. (1990). Regression-based tests for overdispersion in the Poisson model. \textit{Journal of Econometrics}, 46(3), 347--364.
+    \item Chaichi, K., John, L., \& Blackledge-Foughali, G. (2023). What makes consumers loyal to a particular online travel website? Case of booking.com.
+    \item De Vries, L., Gensler, S., \& Leeflang, P.S.H. (2012). Popularity of brand posts on brand fan pages: An investigation of the effects of social media marketing. \textit{Journal of Interactive Marketing}, 26(2), 83--91.
+    \item Eslami, S.P., Ghasemaghaei, M., \& Hassanein, K. (2022). Understanding consumer engagement in social media: The role of product lifecycle. \textit{Decision Support Systems}, 162, 113707.
+    \item Gkikas, D.C., Tzafilkou, K., Theodoridis, P.K., Garmpis, A., \& Gkikas, M.C. (2022). How do text characteristics impact user engagement in social media posts? \textit{International Journal of Information Management Data Insights}, 2, 100067.
+    \item Hudson, S., \& Thal, K. (2013). The impact of social media on the consumer decision process: Implications for tourism marketing. \textit{Journal of Travel \& Tourism Marketing}, 30(1--2), 156--160.
+    \item Ko, E.E., Kim, D., \& Kim, G. (2022). Influence of emojis on user engagement in brand-related user-generated content. \textit{Computers in Human Behavior}.
+    \item Kumar, N., Qiu, L., \& Kumar, S. (2022). A hashtag is worth a thousand words: An empirical investigation of social media strategies in trademarking hashtags. \textit{Information Systems Research}, 33(4).
+    \item Mohammad, A.A., Elshaer, I.A., Azazz, A.M., Kooli, C., Algezawy, M., \& Fayyad, S. (2024). The influence of social commerce dynamics on sustainable hotel brand image, customer engagement, and booking intentions. \textit{Sustainability}, 16(14), 6050.
+    \item Moran, G., Muzellec, L., \& Johnson, D. (2019). Message content features and social media engagement. \textit{Journal of Product and Brand Management}, 29(5), 533--545.
+    \item Reddy, M.A.S., \& Prakash, C. (2024). Sentiment analysis of social media networking sites: A comparative study on user engagement and public opinion.
+    \item van der Harst, J.P., \& Angelopoulos, S. (2024). Less is more: Engagement with the content of social media influencers. \textit{Journal of Business Research}, 181, 114746.
+\end{enumerate}
+
+\end{document}

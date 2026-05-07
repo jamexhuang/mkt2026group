@@ -1,0 +1,174 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{fontspec}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+\setstretch{1.15}
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{2em}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.6em}{}
+
+\title{What Drives Engagement on Booking.com's Posts on X?\\[0.3em]
+\large A Content-Feature Analysis of 766 Brand Tweets, with a Negative Binomial Robustness Check}
+\author{Group [Group-ID] \quad BMAN74042 Marketing Analytics, 2025--26}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Background}
+
+Booking.com is one of the world's leading online travel platforms (Statista, 2025), connecting travellers with accommodation, transport and travel-related experiences (Littlehotelier, 2026). The brand is positioned as a value-driven and convenience-led platform, offering extensive choice, transparent pricing and a one-stop booking experience (Chaichi et al., 2023). Its core audience consists of digitally active, convenience-oriented travellers, with young adults aged 25--34 forming a key user group (similarweb, 2026). Despite its strong global market presence, Booking.com faces increasing competition from platforms such as Expedia, Airbnb and Trip.com (similarweb, 2026). We selected Booking.com because travel discovery and decision-making are increasingly shaped by online content and social media (Hudson and Thal, 2013). For Booking.com, likes indicate audience approval, comments reflect active interaction, and shares signal endorsement and extend organic reach (Eslami et al., 2022). Together these actions improve algorithmic visibility, strengthen trust, and support booking-related consideration (Mohammad et al., 2024). This study therefore defines social media engagement as a combined measure of likes, comments and shares on Booking.com's X posts.
+
+\section{Content Features and Hypotheses}
+
+This study examines five textual content features that may shape engagement on Booking.com's X posts: text length, question marks, emotional valence, hashtag count, and emoji use. These features represent five dimensions of brand communication: informativeness, interactivity, emotional tone, discoverability, and expressiveness.
+
+\textbf{Text length} is the number of recognised English words in each post. Textual characteristics, including post length, can affect engagement by influencing how much information is communicated and how users process brand messages (Gkikas et al., 2022). For Booking.com, longer posts may convey richer destination information, booking benefits, or travel inspiration, potentially increasing content usefulness.
+
+\textbf{H1.} Text length is positively associated with social media engagement on Booking.com's X posts.
+
+\textbf{Question marks} indicate question-based or interrogative content. De Vries et al. (2012) argue that questions are highly interactive brand-post characteristics because they invite responses from brand fans. Questions about destinations, holiday plans, or travel preferences may encourage users to share opinions and experiences and thereby stimulate interaction.
+
+\textbf{H2.} The use of question marks is positively associated with social media engagement on Booking.com's X posts.
+
+\textbf{Emotional valence} captures the positivity or negativity expressed in post text. Higher valence indicates a more positive tone. Positive sentiment has been shown to enhance user engagement and loyalty on social media (Reddy and Prakash, 2024). Because travel is closely associated with enjoyment, relaxation and memorable experiences, positive language may make Booking.com's posts more appealing and interaction-worthy.
+
+\textbf{H3.} Emotional valence is positively associated with social media engagement on Booking.com's X posts.
+
+\textbf{Hashtag count} is the number of hashtags included in each post. Hashtags classify content and connect posts to wider topic-based conversations. Kumar et al. (2022) suggest that hashtags play an important role in increasing audience engagement on social media. For Booking.com, destination-, season- or campaign-related hashtags may improve discoverability and extend reach beyond existing followers.
+
+\textbf{H4.} The number of hashtags is positively associated with social media engagement on Booking.com's X posts.
+
+\textbf{Emoji use} refers to whether a post contains one or more emojis. Emojis function as visual and emotional cues that make text more expressive and easier to interpret. Ko et al. (2022) find that emoji presence is positively associated with consumer engagement in brand-related posts. For Booking.com, travel-related emojis may reinforce meanings linked to flights, hotels, destinations and holidays while creating a warmer brand tone.
+
+\textbf{H5.} Emoji use is positively associated with social media engagement on Booking.com's X posts.
+
+\section{Data}
+
+The data used in this study were obtained from a publicly available dataset of social media posts from Booking.com on X. The dataset was originally collected using the Twitter API with Academic Research access on 1 January 2023. Data retrieval followed the ``most recent 3{,}200 tweets'' method, which reflects the maximum number of posts accessible per account under API constraints and yields a comprehensive recent sample of brand activity.
+
+The unit of analysis is an individual tweet, with each observation representing a single original post and its associated engagement outcomes (likes, comments and shares). To ensure consistency with the research objective, which focuses on how firm-generated content drives engagement, replies and retweets were removed prior to release of the dataset, as they reflect reactive or redistributed content rather than original brand communication. Tweets containing video content were also excluded, so that the analysis isolates textual and basic visual features (images, URLs, mentions) and is not contaminated by the very different engagement dynamics of video. No further row-level filtering is applied at the analysis stage; non-English tokens are handled at the measurement stage rather than via row exclusion, since the dictionary-based valence lexicon naturally yields zero matches for non-English content and contributes 0 to per-post valence without removing the row. The final dataset consists of 766 original posts spanning 1 November 2021 to 21 November 2022, of which 104 (13.6\%) record zero combined engagement and the remainder span the full positive range up to a maximum of 2{,}474 combined reactions.
+
+This dataset is appropriate for our research objective: it captures a sufficiently large brand-generated sample with observable variation in textual features and engagement outcomes; the use of a single brand keeps tone, voice and audience constant, which sharpens identification; and the documented procedure supports transparency and replication. The API-side ``most recent 3{,}200 tweets'' rule means very old posts are not represented, but this affects all brand accounts symmetrically. The 13-month window covers two distinct travel seasons, lending natural variation to the topical mix. Descriptive checks (Section 4) flag the right-skew of raw engagement, motivating both the log transformation in the OLS specification and the count-model NB robustness specification in Section 5.
+
+\section{Measurement of Variables}
+
+Our dependent variable (DV) is social media engagement, defined as $\text{Engagement}_i = \text{like}_i + \text{comment}_i + \text{share}_i$ for post $i$. Because raw engagement is severely right-skewed (skewness $=7.67$, max $=2{,}474$, with 104 zero-engagement posts), the primary regression uses $\ln(1+\text{Engagement}_i)$, computed via \texttt{numpy.log1p}; the $+1$ offset preserves zero-engagement posts and the natural log gives a near-symmetric DV (skewness $=1.00$). The robustness regression in Section 6 keeps the same predictors but uses the raw integer count.
+
+The five independent variables (IVs) are extracted in Python using \texttt{pandas} and the standard NLTK / scikit-learn stop-word list. \textbf{Text length} is the whitespace token count of the final cleaned text after a six-stage pipeline that strips URLs, @mentions, hashtags, punctuation, digits, English stop-words, and case. \textbf{Question mark} is a binary indicator (1 if the raw post contains at least one ``?''); 16.7\% of posts qualify. \textbf{Emotional valence} is computed by tokenising the cleaned text and matching tokens against a 1--9 valence lexicon (a Warriner-style ANEW extension); per-post scores are mean-aggregated across matched tokens and centred by subtracting 4.5, so that zero corresponds to neutrality and positive (negative) values denote pleasant (unpleasant) tone. \textbf{Hashtag count} and \textbf{emoji count} are direct counts of \texttt{\#tag} tokens and emoji code-points in the raw post; both distributions are right-skewed.
+
+Three control variables (CVs) are included: \textbf{Picture (0/1)}, \textbf{URL (0/1)} and \textbf{At-Mention (0/1)}, each coded as 1 if the post has at least one image, URL or @mention respectively. Coding the controls as binary dummies, rather than raw counts, reflects the bimodal-at-zero shape of these variables (more than 96\% of values are 0 or 1) and aligns with the theoretically meaningful contrast for content design: presence versus absence rather than dosage of attachments. The descriptives reported below are consistent with prior brand-microblog literature: log-transformed engagement is mildly right-skewed; 17\% of posts contain a question mark; 29\% include an image; 70\% carry a URL; only 8\% involve an @mention, suggesting that partner-style co-promotion is rare in Booking.com's social mix. Hashtags and emojis are sparse (means below 0.5), with most posts using neither, and average text length is 23 words, indicative of an editorial style already favouring short copy. The maximum raw engagement of 2{,}474 corresponds to a viral seasonal campaign post; we retain it as a genuine observation because the log transformation mitigates its leverage on OLS, and the NB count specification expects a heavy right tail by construction. There are no missing values, so the analytical sample equals the descriptive sample of 766 posts.
+
+\begin{table}[H]
+\centering\small
+\caption{Descriptive Statistics ($N=766$)}
+\begin{tabular}{lrrrrrr}
+\toprule
+Variable & Mean & SD & Min & Median & Max & Skew \\
+\midrule
+$\ln(1+\text{Engagement})$ & 1.942 & 1.572 & 0.000 & 1.609 & 7.814 & 1.001 \\
+Engagement (raw count) & 13.39 & 106.71 & 0 & 4 & 2{,}474 & 7.67 \\
+Text Length (words) & 23.453 & 12.257 & 0 & 22 & 53 & 0.239 \\
+Question Mark (0/1) & 0.167 & 0.373 & 0 & 0 & 1 & 1.785 \\
+Emotional Valence & 0.789 & 1.528 & $-3.352$ & 0.000 & 3.948 & 0.371 \\
+Hashtag Count & 0.145 & 0.489 & 0 & 0 & 3 & 3.817 \\
+Emoji Count & 0.398 & 0.884 & 0 & 0 & 13 & 5.261 \\
+Picture (0/1) & 0.287 & 0.453 & 0 & 0 & 1 & 0.941 \\
+URL (0/1) & 0.698 & 0.459 & 0 & 1 & 1 & $-0.865$ \\
+At-Mention (0/1) & 0.080 & 0.271 & 0 & 0 & 1 & 3.105 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Model Specifications}
+
+We estimate two complementary specifications on the same right-hand side. The primary specification is OLS log-linear in $\ln(1+\text{Engagement})$. Multicollinearity was assessed via Variance Inflation Factors before any coefficient interpretation; all eight VIFs are below 2 (maximum $=1.64$ for the Picture dummy, minimum $=1.08$ for Text Length), well within the conventional threshold of 10 widely used as a serious-multicollinearity flag, so no variable is dropped and all eight regressors are retained simultaneously. A Breusch--Pagan test on the squared residuals rejects homoscedasticity (LM $=90.22$, $p<.0001$); we therefore report HC1 heteroscedasticity-consistent (White--MacKinnon) standard errors throughout, computed via \texttt{statsmodels} with \texttt{cov\_type="HC1"}. Point estimates are identical to classical OLS; only the standard errors, $t$-values and $p$-values differ. Residual normality is mildly violated (Shapiro--Wilk $W=0.97$), which is expected with 766 observations and not a threat to inference given the central limit theorem.
+
+\begin{equation}\small
+\begin{aligned}
+\ln(1+\text{Engagement}_i) ={}& \beta_0 + \beta_1\text{TextLength}_i + \beta_2\text{Question}_i + \beta_3\text{Valence}_i \\
+& + \beta_4\text{Hashtag}_i + \beta_5\text{Emoji}_i + \beta_6\text{PictureD}_i + \beta_7\text{URLD}_i + \beta_8\text{AtMentionD}_i + \varepsilon_i.
+\end{aligned}
+\end{equation}
+
+The robustness specification is Negative Binomial (NB2) on the raw integer engagement count with a log link. We adopt this as a verification step because Engagement is a non-negative integer count with severe overdispersion ($s^2/\bar Y \approx 850$); fitting an NB regression alongside OLS verifies that the focal hypothesis decisions are not artefacts of the log-linear functional form and is the count-model counterpart that the assignment brief encourages. The dispersion parameter is anchored via the marginal method-of-moments estimator $\hat\alpha_{\text{MoM}}=(s^2(Y)-\bar Y)/\bar Y^{\,2}=20.21$, and the NB GLM is fit by iteratively reweighted least squares with HC1 robust standard errors. A boundary likelihood-ratio test against Poisson rejects the equidispersion restriction overwhelmingly ($\chi^2=71{,}095$, $p<.0001$ on $\tfrac12 \chi^2_1$), confirming that the data are not Poisson and that an NB benchmark is the appropriate count-model. For the NB regression, multiplicative effects on the expected count are read from incidence rate ratios $\text{IRR}=\exp(\alpha_k)$; for binary $X$, $\text{IRR}$ is the ratio $\mathbb{E}[Y\mid X=1]/\mathbb{E}[Y\mid X=0]$.
+
+\begin{equation}\small
+\ln(\mathbb{E}[\text{Engagement}_i \mid X_i]) = \alpha_0 + \sum_{k=1}^{8}\alpha_k X_{ki},\qquad \text{Engagement}_i \sim \text{NB}(\mu_i, \theta).
+\end{equation}
+
+We chose standard NB rather than zero-inflated NB or hurdle models because the analytical sample carries only 13.6\% zeros, well within standard NB's regime. As additional robustness checks we re-estimated the OLS specification under classical, HC3 and month-clustered standard errors; significance conclusions for every focal predictor are stable, indicating the reported associations are not artefacts of the SE choice. Combined with the NB cross-check, this yields a layered robustness profile across both inference and functional-form choices.
+
+\section{Results}
+
+Table~\ref{tab:reg} reports the primary OLS regression. The model explains 51.2\% of the variance in $\ln(1+\text{Engagement})$ ($F(8,757)=76.68$, $p<.0001$), a strong fit for cross-sectional social-media data. Hypothesis tests use HC1 robust standard errors and two-tailed $p$-values; percentage effects are computed as $(e^{\beta}-1)\times 100\%$ and refer to the change in $(1+\text{Engagement})$ holding other variables constant.
+
+\begin{table}[H]
+\centering\small
+\caption{OLS Regression with HC1 Robust SE Predicting $\ln(1+\text{Engagement})$, $N=766$}
+\label{tab:reg}
+\begin{tabular}{lcccc}
+\toprule
+Variable & Coefficient & Robust SE & $t$ & $p$ \\
+\midrule
+Text Length (H1) & $-0.0193^{***}$ & 0.0032 & $-5.98$ & $<.0001$ \\
+Question Mark (H2) & $0.4687^{***}$ & 0.1325 & 3.54 & 0.0004 \\
+Emotional Valence (H3) & $0.0641^{*}$ & 0.0266 & 2.41 & 0.0161 \\
+Hashtag Count (H4) & $1.0623^{***}$ & 0.1276 & 8.33 & $<.0001$ \\
+Emoji Count (H5) & $0.3144^{***}$ & 0.0834 & 3.77 & 0.0002 \\
+Picture (0/1) & $1.1376^{***}$ & 0.1344 & 8.47 & $<.0001$ \\
+URL (0/1) & $0.1461$ & 0.0868 & 1.68 & 0.0923 \\
+At-Mention (0/1) & $0.8898^{***}$ & 0.2433 & 3.66 & 0.0003 \\
+Intercept & $1.4882^{***}$ & 0.1069 & 13.92 & $<.0001$ \\
+\midrule
+\multicolumn{5}{l}{$R^2 = 0.5119$, Adj.\ $R^2 = 0.5068$, all VIFs $<2$.} \\
+\multicolumn{5}{l}{$^{***}p<.001$, $^{**}p<.01$, $^{*}p<.05$ (two-tailed).} \\
+\end{tabular}
+\end{table}
+
+Text length carries a negative and highly significant coefficient ($\beta_1=-0.019$, $p<.001$): each additional cleaned word is associated with about a 1.9\% \emph{decrease} in $(1+\text{Engagement})$. Because the predicted sign is opposite to H1, \textbf{H1 is not supported}. The rejection of H1 runs counter to the brand-page literature on Facebook (Gkikas et al., 2022); on X the platform context differs in two relevant ways: posts compete for attention in a fast-scrolling feed where each additional clause raises bounce risk, and longer copy tends to be heavier on transactional information that suppresses affective signals. The coefficient should therefore be read as platform-specific evidence in favour of the cognitive-ease perspective rather than as a global rejection of informativeness. The presence of a question mark is associated with a $(e^{0.4687}-1)\approx 60\%$ higher engagement ($p<.001$), consistent with the conversational-cue mechanism: \textbf{H2 is supported}. A one-unit increase in emotional valence is associated with about a 6.6\% increase ($\beta_3=+0.064$, $p=.016$); the magnitude is modest but statistically significant, so \textbf{H3 is supported under OLS}. Each additional hashtag is associated with about a 189\% increase ($p<.001$), the largest standardised effect among the focal variables: \textbf{H4 is supported}. Each additional emoji is associated with about a 37\% increase ($p<.001$): \textbf{H5 is supported}. Among controls, the presence of a picture is associated with a substantial increase in engagement ($\beta=+1.138$, $\approx +212\%$, $p<.001$), and the presence of an @mention with a sizeable increase as well ($\beta=+0.890$, $\approx +143\%$, $p<.001$). The URL dummy is positive but not significant at the 5\% level ($\beta=+0.146$, $p=.092$); given that 70\% of posts already include a URL, the marginal contribution of merely attaching a link appears small once images, mentions and the textual features are held constant. We use correlational language throughout because the design is observational; these patterns describe within-Booking.com associations rather than causal effects.
+
+\textit{Robustness to functional form (Negative Binomial verification).} We re-estimated the same eight-predictor model as a Negative Binomial regression on the raw engagement counts. The boundary likelihood-ratio test against Poisson is decisive (LR $\chi^2 = 71{,}095$, $p<.0001$, $\hat\alpha=20.21$), confirming the extreme overdispersion that motivated the check. Hypothesis decisions are concordant for four of the five focal predictors: H1 remains not supported with the same negative sign (NB IRR $=0.97$, $p<.001$); H2 supported (IRR $=2.52$, $p=.004$); H4 supported (IRR $=2.85$, $p<.001$); and H5 supported (IRR $=1.47$, $p=.007$). The picture and at-mention controls are even larger under NB (IRR $=4.93$ and $5.46$, both $p<.001$), and the URL dummy reaches conventional significance under NB (IRR $=1.64$, $p=.005$). The single divergence is H3 (Emotional Valence): the NB coefficient is positive with the same sign as OLS but only marginally significant (IRR $=1.10$, $p=.10$, 95\% CI $[0.98, 1.22]$). H3 is therefore supported under OLS but marginal under NB; we report this calibrated qualification rather than choosing one model post hoc. The four-of-five concordance materially strengthens the inferential basis of the headline findings.
+
+\section{Managerial Suggestions}
+
+Translating these results into copy-writing guidance, our findings deliver an unambiguous content recipe for Booking.com's social team. First, \textbf{keep posts short}: the negative text-length coefficient, plus the strong performance of H4--H5 features that compete for character budget, argues for a 15--25 word target; the NB IRR of $0.97$ per word confirms the OLS direction. Second, \textbf{lead with a question} when feasible---the question-mark dummy alone is associated with a 60\% engagement uplift in OLS and an IRR of 2.5 in NB, so prompts such as ``Where's your dream city break for 2026?'' are systematically high-leverage. Third, \textbf{stay aspirational and positive}: a one-unit valence shift is worth 6.6\% under OLS, with a softer NB confirmation (IRR $\approx 1.10$, $p=.10$); editorial copy should foreground excitement, sensory detail and benefit framing, and we recommend treating valence as a secondary lever rather than a primary one given the OLS--NB divergence. Fourth, \textbf{always pair the post with an image}: the picture dummy contributes the largest single boost in both models (OLS $\approx +212\%$; NB IRR $=4.93$), so any post-without-image draft should be flagged for review. Fifth, \textbf{include one or two relevant hashtags}; each is associated with roughly tripling engagement, but stacking beyond two crosses into spam territory and dilutes message clarity. Sixth, \textbf{add one or two contextual emojis} such as travel pictograms; each emoji contributes a meaningful lift (OLS $\sim+37\%$; NB IRR $=1.47$), and they double as low-effort visual hooks in the timeline. Seventh, \textbf{tag relevant partners} only when authentic---the @mention dummy is associated with a $+143\%$ OLS effect and an NB IRR of 5.46, but this likely reflects co-promotion synergies and should not be applied indiscriminately. Trade-off: very high-emotion or hashtag-heavy posts can erode perceived authenticity and brand competence; we recommend running A/B tests before scaling these patterns to all campaigns.
+
+\section{Limitations and Possible Improvements}
+
+Our design is observational and single-platform, so causal claims and cross-platform generalisation are not warranted; unobserved confounders such as posting time, season and concurrent paid promotion may bias coefficients. The lexicon-based valence measure is dictionary-bound and cannot detect sarcasm, irony or travel-specific slang. The composite engagement weights likes, comments and shares equally. The NB joint likelihood is poorly identified in $\alpha$ on heavily overdispersed counts, so we used a method-of-moments anchor; future replications on a higher-zero-rate sample could extend the robustness check to zero-inflated NB or hurdle models, and a small randomised content experiment could move the inference base from correlational to causal.
+
+\section*{References}
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item Cameron, A.C. and Trivedi, P.K. (1990) `Regression-based tests for overdispersion in the Poisson model', \textit{Journal of Econometrics}, 46(3), pp. 347--364.
+    \item Chaichi, K., John, L. and Blackledge-Foughali, G. (2023) `What Makes Consumers Loyal to a Particular Online Travel Website? Case of booking.com'. Available at: \url{https://www.researchgate.net/publication/375022200} (Accessed: 24 April 2026).
+    \item De Vries, L., Gensler, S. and Leeflang, P.S.H. (2012) `Popularity of Brand Posts on Brand Fan Pages: an Investigation of the Effects of Social Media Marketing', \textit{Journal of Interactive Marketing}, 26(2), pp. 83--91. \url{https://doi.org/10.1016/j.intmar.2012.01.003}.
+    \item Eslami, S.P., Ghasemaghaei, M. and Hassanein, K. (2022) `Understanding consumer engagement in social media: The role of product lifecycle', \textit{Decision Support Systems}, 162, p. 113707. \url{https://doi.org/10.1016/j.dss.2021.113707}.
+    \item Gkikas, D.C. et al. (2022) `How do text characteristics impact user engagement in social media posts: Modeling content readability, length, and hashtags number in Facebook', \textit{International Journal of Information Management Data Insights}, 2(1), p. 100067. \url{https://doi.org/10.1016/j.jjimei.2022.100067}.
+    \item Hudson, S. and Thal, K. (2013) `The Impact of Social Media on the Consumer Decision Process: Implications for Tourism Marketing', \textit{Journal of Travel \& Tourism Marketing}, 30(1--2), pp. 156--160. \url{https://doi.org/10.1080/10548408.2013.751276}.
+    \item Ko, E. (Emily), Kim, D. and Kim, G. (2022) `Influence of emojis on user engagement in brand-related user-generated content', \textit{Computers in Human Behavior}. Available via University of Manchester library access (Accessed: 30 March 2026).
+    \item Kumar, N., Qiu, L. and Kumar, S. (2022) `A Hashtag Is Worth a Thousand Words: An Empirical Investigation of Social Media Strategies in Trademarking Hashtags', \textit{Information Systems Research}, 33(4). \url{https://doi.org/10.1287/isre.2022.1107}.
+    \item Littlehotelier (2026) \textit{Booking.com platform overview}. Available at: \url{https://www.littlehotelier.com/} (Accessed: 6 May 2026).
+    \item Mohammad, A.A. et al. (2024) `The Influence of Social Commerce Dynamics on Sustainable Hotel Brand Image, Customer Engagement, and Booking Intentions'. Available at: \url{https://www.researchgate.net/publication/382282768} (Accessed: 24 April 2026).
+    \item Reddy, M.A.S. and Prakash, C. (2024) `Sentiment Analysis of Social Media Networking Sites: A Comparative Study on User Engagement and Public Opinion'. Available at: \url{https://www.researchgate.net/publication/384199911} (Accessed: 30 March 2026).
+    \item similarweb (2026) \textit{Booking.com -- domain analysis}. Available at: \url{https://pro.similarweb.com/?sourcepage=website-analysis&domain=booking.com} (Accessed: 2 May 2026).
+    \item Statista (2025) \textit{Online travel market}. Available at: \url{https://www.statista.com/topics/2704/online-travel-market/} (Accessed: 25 April 2026).
+\end{enumerate}
+
+\end{document}
